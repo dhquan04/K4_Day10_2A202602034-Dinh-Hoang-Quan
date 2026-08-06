@@ -12,6 +12,87 @@ from core.utils import read_json, safe_slug, write_json
 from retrieval.embeddings import MiniLMEmbeddings
 
 
+INDEX_REQUIRED_COLUMNS: tuple[str, ...] = (
+    "paper_id",
+    "title",
+    "text_for_embedding",
+    "published",
+    "authors_joined",
+    "categories_joined",
+    "summary",
+    "abs_url",
+    "pdf_url",
+)
+
+# Optional metadata fields may be an empty string when Crossref does not
+# supply them. They must still be scalar/non-null so Chroma can store them.
+INDEX_NON_EMPTY_COLUMNS: tuple[str, ...] = (
+    "paper_id",
+    "title",
+    "text_for_embedding",
+    "published",
+    "summary",
+)
+
+
+class IndexInputValidationError(ValueError):
+    """Raised when cleaned data cannot safely be written to Chroma."""
+
+
+def validate_index_input(df: pd.DataFrame) -> None:
+    """Check the cleaned-data contract required by the retrieval layer.
+
+    Cleaning owns the full schema validation. This smaller guard protects the
+    index boundary: Chroma receives only the document content and scalar
+    metadata listed in :data:`INDEX_REQUIRED_COLUMNS`.
+    """
+    missing_columns = [column for column in INDEX_REQUIRED_COLUMNS if column not in df.columns]
+    if missing_columns:
+        raise IndexInputValidationError(
+            f"Cannot build retrieval index; missing required columns: {missing_columns}."
+        )
+    if df.empty:
+        raise IndexInputValidationError("Cannot build retrieval index from an empty dataframe.")
+
+    invalid_ids = df["paper_id"].isna() | df["paper_id"].astype(str).str.strip().eq("")
+    if invalid_ids.any():
+        raise IndexInputValidationError(
+            f"Cannot build retrieval index; {int(invalid_ids.sum())} rows have an empty paper_id."
+        )
+    duplicate_ids = df["paper_id"].astype(str).str.strip().duplicated(keep=False)
+    if duplicate_ids.any():
+        examples = df.loc[duplicate_ids, "paper_id"].astype(str).head(3).tolist()
+        raise IndexInputValidationError(
+            "Cannot build retrieval index; paper_id must be unique "
+            f"(duplicate examples: {examples})."
+        )
+
+    for column in INDEX_REQUIRED_COLUMNS:
+        null_values = df[column].isna()
+        if null_values.any():
+            raise IndexInputValidationError(
+                f"Cannot build retrieval index; {int(null_values.sum())} rows have null {column}."
+            )
+
+    for column in INDEX_NON_EMPTY_COLUMNS:
+        missing_values = df[column].astype(str).str.strip().eq("")
+        if missing_values.any():
+            raise IndexInputValidationError(
+                f"Cannot build retrieval index; {int(missing_values.sum())} rows have an empty {column}."
+            )
+
+    non_scalar_metadata = [
+        column
+        for column in INDEX_REQUIRED_COLUMNS
+        if df[column].map(lambda value: isinstance(value, (dict, list, set, tuple))).any()
+    ]
+    if non_scalar_metadata:
+        raise IndexInputValidationError(
+            "Cannot build retrieval index; Chroma metadata must be scalar values, "
+            f"but these columns contain collections: {non_scalar_metadata}."
+        )
+
+
 @dataclass(frozen=True)
 class SearchResult:
     paper_id: str
@@ -87,6 +168,7 @@ class LocalEmbeddingIndex:
         settings: Settings,
         embeddings_output_path: Path | None = None,
     ) -> "LocalEmbeddingIndex":
+        validate_index_input(df)
         collection_name = cls._derive_collection_name(settings, embeddings_output_path)
         documents = cls._build_documents(df)
         persist_path = settings.paths.chroma_dir
