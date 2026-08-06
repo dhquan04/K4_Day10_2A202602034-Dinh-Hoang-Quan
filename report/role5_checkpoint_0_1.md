@@ -3,7 +3,7 @@
 **Nhóm:** ChickenFarmer  
 **Vai trò:** Evaluation & observability owner (`eval|observe`)  
 **Phạm vi:** `src/evaluation/testset.py`, `src/observability/quality.py`, `data/eval/`, `data/quality/`  
-**Checkpoint:** CP0–CP4
+**Checkpoint:** CP0–CP5
 
 ## Checkpoint 0 — Contract evaluation & observability
 
@@ -228,3 +228,38 @@ CP4 là checkpoint nghỉ. Role 5 (`eval|observe`) chỉ cần: **khóa test set
 ### Ngoài phạm vi Role 5 ở CP4
 
 Không implement corruption flow, không sửa `corruption.py` / `phase1.py` / retrieval.
+
+## Checkpoint 5 — Evaluate corrupted/repaired & liên kết signal→metric
+
+### Checklist Role 5
+
+| Việc | Trạng thái | Evidence |
+| --- | --- | --- |
+| Evaluate corrupted bằng locked `test_set.json` | Done (Lead flow + Role 5 verify SHA) | SHA khớp `test_set_lock.json` |
+| `corrupted_answers/metrics` | Có | `data/results/corrupted_*.json` |
+| Quality/freshness corrupted | Có | `corrupted_quality.json`, `corrupted_freshness.json` |
+| Evaluate repaired + quality/freshness | Có | `repaired_*.json` |
+| Comparison report + causal links | Done | `generate_corruption_report` → `corruption_report.md`; `role5_cp5_status.json` |
+
+### Số liệu quan sát
+
+| | Baseline | Corrupted | Repaired |
+| --- | ---: | ---: | ---: |
+| `retrieval_hit_rate` | 1.0 | 1.0 | 1.0 |
+| `mean_token_f1` | 0.75 | 0.75 | 0.75 |
+| `judge_accuracy` | 0.75 | 0.75 | 0.75 |
+| `quality.passed` | true | **false** | true |
+| `is_fresh` | true | **false** | true |
+| `stale_rows` | 0 | **2** | 0 |
+
+Answers baseline ≡ corrupted ≡ repaired trên locked test set.
+
+### Kết luận có evidence (không suy diễn quá mức)
+
+1. `blank_summary` / `duplicate_rows` / `stale_date` → quality/freshness xấu đúng forecast; repair từ raw khôi phục signal.
+2. **Agent metrics không đổi** → không kết luận “corruption làm RAG kém hơn” về `hit_rate`/`token_f1`/`judge` với test set hiện tại.
+3. Lý do hợp lý: nhiều corruption không chạm GT của câu hỏi; date question dùng `published` metadata nên noise summary không kéo F1.
+
+### Phụ thuộc
+
+Không còn blocker từ role khác cho CP5 Role 5. Orchestration thuộc Lead (`corruption_flow.py`) — Role 5 sở hữu `generate_corruption_report` và phân tích evidence.

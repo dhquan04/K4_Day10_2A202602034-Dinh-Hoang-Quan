@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-08-06T10:48:43.140074+00:00",
+  "checkpoint": "CP5",
+  "role": "eval|observe",
+  "test_set_lock": {
+    "path": "data/eval/test_set.json",
+    "expected_sha256": "656f039f10d8218b8d8ce5f8a8760065a18aa552d310e169d9311de87fa81527",
+    "current_sha256": "656f039f10d8218b8d8ce5f8a8760065a18aa552d310e169d9311de87fa81527",
+    "unchanged": true,
+    "samples": 8
+  },
+  "artifacts": {
+    "corrupted_answers": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\results\\corrupted_answers.json",
+    "corrupted_metrics": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\results\\corrupted_metrics.json",
+    "corrupted_quality": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\quality\\corrupted_quality.json",
+    "corrupted_freshness": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\quality\\corrupted_freshness.json",
+    "repaired_answers": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\results\\repaired_answers.json",
+    "repaired_metrics": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\results\\repaired_metrics.json",
+    "repaired_quality": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\quality\\repaired_quality.json",
+    "repaired_freshness": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\quality\\repaired_freshness.json",
+    "comparison_report": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\reports\\corruption_report.md"
+  },
+  "metrics": {
+    "baseline": {
+      "samples": 8,
+      "retrieval_hit_rate": 1.0,
+      "mean_token_f1": 0.75,
+      "judge_accuracy": 0.75,
+      "mean_judge_score": 4,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    },
+    "corrupted": {
+      "samples": 8,
+      "retrieval_hit_rate": 1.0,
+      "mean_token_f1": 0.75,
+      "judge_accuracy": 0.75,
+      "mean_judge_score": 4,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    },
+    "repaired": {
+      "samples": 8,
+      "retrieval_hit_rate": 1.0,
+      "mean_token_f1": 0.75,
+      "judge_accuracy": 0.75,
+      "mean_judge_score": 4,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    },
+    "agent_metrics_changed": false,
+    "note": "baseline_answers identical to corrupted_answers and repaired_answers on locked test set"
+  },
+  "quality_freshness": {
+    "baseline_quality_passed": true,
+    "corrupted_quality_passed": false,
+    "repaired_quality_passed": true,
+    "baseline_is_fresh": true,
+    "corrupted_is_fresh": false,
+    "repaired_is_fresh": true,
+    "stale_rows": {
+      "baseline": 0,
+      "corrupted": 2,
+      "repaired": 0
+    }
+  },
+  "causal_links_with_evidence": [
+    {
+      "corruption": "blank_summary",
+      "affected_paper_ids": [
+        "10.20944/preprints202602.0996.v1",
+        "10.63646/kpqm1958"
+      ],
+      "quality_signal": "summary_not_null/summary_min_length fail (value=2)",
+      "metric_conclusion": "No aggregate metric change observed on locked test set; blanked papers are not GT docs for current questions.",
+      "evidence": true
+    },
+    {
+      "corruption": "duplicate_rows",
+      "affected_paper_ids": [
+        "10.21203/rs.3.rs-10012178/v1",
+        "10.1093/sleep/zsag091.0346"
+      ],
+      "quality_signal": "paper_id_unique fail",
+      "overlap_locked_gt": [
+        "10.21203/rs.3.rs-10012178/v1",
+        "10.1093/sleep/zsag091.0346"
+      ],
+      "metric_conclusion": "Quality uniqueness fails, but retrieval_hit_rate/token_f1 unchanged (still 1.0/0.75).",
+      "evidence": true
+    },
+    {
+      "corruption": "stale_date",
+      "affected_paper_ids": [
+        "10.20944/preprints202604.0339.v1",
+        "10.3390/app16052244"
+      ],
+      "freshness_signal": {
+        "is_fresh": false,
+        "stale_rows": 2,
+        "max_age_days": 561
+      },
+      "metric_conclusion": "Freshness degraded as forecasted; agent metrics unchanged.",
+      "evidence": true
+    },
+    {
+      "corruption": "drop_latest",
+      "affected_paper_ids": [
+        "10.2118/234689-pa",
+        "10.1007/s10278-026-02086-9"
+      ],
+      "freshness_signal": {
+        "latest_published": {
+          "baseline": "2026-08-05",
+          "corrupted": "2026-07-10"
+        }
+      },
+      "overlap_locked_gt": [],
+      "metric_conclusion": "No metric impact; drop IDs not in locked GT.",
+      "evidence": true
+    },
+    {
+      "corruption": "noise_summary",
+      "affected_paper_ids": [
+        "10.3390/buildings16132637",
+        "10.55041/isjem07213"
+      ],
+      "overlap_locked_gt": [
+        "10.3390/buildings16132637"
+      ],
+      "metric_conclusion": "GT overlap exists (date-05 paper) but date answers use published metadata, so token_f1 unchanged.",
+      "evidence": true
+    },
+    {
+      "corruption": "truncate_title",
+      "affected_paper_ids": [
+        "10.52060/juptik.v4i1.4318",
+        "10.21203/rs.3.rs-9770645/v1"
+      ],
+      "overlap_locked_gt": [
+        "10.21203/rs.3.rs-9770645/v1"
+      ],
+      "metric_conclusion": "GT overlap exists (authors-04) but observed answers/metrics identical; cannot claim retrieval regression from numbers.",
+      "evidence": true
+    }
+  ],
+  "metric_conclusions": {
+    "allowed": true,
+    "agent_metrics_delta": {
+      "retrieval_hit_rate": {
+        "baseline": 1.0,
+        "corrupted": 1.0,
+        "repaired": 1.0
+      },
+      "mean_token_f1": {
+        "baseline": 0.75,
+        "corrupted": 0.75,
+        "repaired": 0.75
+      },
+      "judge_accuracy": {
+        "baseline": 0.75,
+        "corrupted": 0.75,
+        "repaired": 0.75
+      }
+    },
+    "quality_signal_delta_observed": true,
+    "freshness_signal_delta_observed": true,
+    "agent_metric_delta_observed": false,
+    "honest_summary": "Corruption changed quality/freshness signals and repair restored them; locked-test-set agent metrics did not move."
+  }
+}
