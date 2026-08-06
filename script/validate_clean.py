@@ -45,6 +45,14 @@ def _load_clean_dataframe(csv_path: Path, json_path: Path) -> pd.DataFrame:
         # text columns, and pandas' default NA sniffing would turn them back
         # into NaN on read, which is not what write_csv produced.
         df = pd.read_csv(csv_path, keep_default_na=False, na_filter=False)
+        # text_for_embedding embeds real newlines inside a CSV cell. Without a
+        # .gitattributes forcing eol=lf, a Windows checkout with
+        # core.autocrlf=true rewrites those to \r\n on checkout, so every row
+        # would otherwise fail template reconstruction on line endings alone.
+        text_columns = df.select_dtypes(include="object").columns
+        df[text_columns] = df[text_columns].apply(
+            lambda col: col.str.replace("\r\n", "\n").str.replace("\r", "\n")
+        )
         for column in ("authors", "categories"):
             if column in df.columns:
                 df[column] = df[column].apply(_coerce_list_cell)
