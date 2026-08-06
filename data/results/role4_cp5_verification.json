@@ -1,0 +1,182 @@
+{
+  "checkpoint": 5,
+  "role": "RAG & agent",
+  "status": "pass",
+  "corrupted_collection": {
+    "name": "papers-corrupted",
+    "documents": 24,
+    "manifest": "data\\embeddings\\papers_embeddings_corrupted.json"
+  },
+  "frozen_query_deltas": [
+    {
+      "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
+      "expected_paper_id": "10.2118/234689-pa",
+      "baseline_results": [
+        {
+          "paper_id": "10.2118/234689-pa",
+          "title": "SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation",
+          "score": 0.675655
+        },
+        {
+          "paper_id": "10.20944/preprints202604.0339.v1",
+          "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
+          "score": 0.455182
+        },
+        {
+          "paper_id": "10.55041/isjem07213",
+          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
+          "score": 0.443581
+        },
+        {
+          "paper_id": "10.21203/rs.3.rs-9770645/v1",
+          "title": "Adapting Large Language Models for Low-Resource Regulated Domains: A Fine-Tuning and Retrieval-Augmented Generation Approach to Insurance Information Delivery in Kenya",
+          "score": 0.436991
+        }
+      ],
+      "corrupted_results": [
+        {
+          "paper_id": "10.20944/preprints202604.0339.v1",
+          "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
+          "score": 0.455356
+        },
+        {
+          "paper_id": "10.55041/isjem07213",
+          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
+          "score": 0.443581
+        },
+        {
+          "paper_id": "10.32473/flairs.39.1.141782",
+          "title": "An Exploratory Study of Agentic Retrieval Augmented Generation for Mental Health Oriented Language Models",
+          "score": 0.429239
+        },
+        {
+          "paper_id": "10.54254/2753-8818/2026.dl34055",
+          "title": "Hallucination in Large Language Models and Retrieval-Augmented Generation: Mechanisms, Mitigation, and Evaluation",
+          "score": 0.415747
+        }
+      ],
+      "delta": {
+        "baseline_expected_rank": 1,
+        "corrupted_expected_rank": null,
+        "expected_top_1_lost": true,
+        "top_1_changed": true
+      }
+    },
+    {
+      "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
+      "expected_paper_id": "10.1007/s10278-026-02086-9",
+      "baseline_results": [
+        {
+          "paper_id": "10.1007/s10278-026-02086-9",
+          "title": "JADE-Plus: A Multimodal Agentic Retrieval-Augmented Generation Large Language Framework for Diagnostic Support in Jawbone Lesions: Development and Technical Validation Study",
+          "score": 0.734728
+        },
+        {
+          "paper_id": "10.70121/001c.158711",
+          "title": "The Role of Retrieval-Augmented Generation in Improving Factual Accuracy for Medical Large Language Models",
+          "score": 0.324202
+        },
+        {
+          "paper_id": "10.1093/sleep/zsag091.0346",
+          "title": "0346 Retrieval Augmented Generation Improves Large Language Model Performance in Sleep Medicine",
+          "score": 0.304865
+        },
+        {
+          "paper_id": "10.20944/preprints202602.0996.v1",
+          "title": "Clinical Large Language Models with Multi-Stage Instruction Tuning and Advanced Retrieval-Augmented Generation",
+          "score": 0.235206
+        }
+      ],
+      "corrupted_results": [
+        {
+          "paper_id": "10.70121/001c.158711",
+          "title": "The Role of Retrieval-Augmented Generation in Improving Factual Accuracy for Medical Large Language Models",
+          "score": 0.324202
+        },
+        {
+          "paper_id": "10.1093/sleep/zsag091.0346",
+          "title": "0346 Retrieval Augmented Generation Improves Large Language Model Performance in Sleep Medicine",
+          "score": 0.304865
+        },
+        {
+          "paper_id": "10.1093/sleep/zsag091.0346",
+          "title": "0346 Retrieval Augmented Generation Improves Large Language Model Performance in Sleep Medicine",
+          "score": 0.304865
+        },
+        {
+          "paper_id": "10.20944/preprints202602.0996.v1",
+          "title": "Clinical Large Language Models with Multi-Stage Instruction Tuning and Advanced Retrieval-Augmented Generation",
+          "score": 0.255756
+        }
+      ],
+      "delta": {
+        "baseline_expected_rank": 1,
+        "corrupted_expected_rank": null,
+        "expected_top_1_lost": true,
+        "top_1_changed": true
+      }
+    },
+    {
+      "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
+      "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
+      "baseline_results": [
+        {
+          "paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "title": "Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis",
+          "score": 0.729381
+        },
+        {
+          "paper_id": "10.55041/isjem07213",
+          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
+          "score": 0.509605
+        },
+        {
+          "paper_id": "10.20944/preprints202604.0339.v1",
+          "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
+          "score": 0.454921
+        },
+        {
+          "paper_id": "10.21203/rs.3.rs-9770645/v1",
+          "title": "Adapting Large Language Models for Low-Resource Regulated Domains: A Fine-Tuning and Retrieval-Augmented Generation Approach to Insurance Information Delivery in Kenya",
+          "score": 0.45449
+        }
+      ],
+      "corrupted_results": [
+        {
+          "paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "title": "Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis",
+          "score": 0.729381
+        },
+        {
+          "paper_id": "10.55041/isjem07213",
+          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
+          "score": 0.509605
+        },
+        {
+          "paper_id": "10.20944/preprints202602.0996.v1",
+          "title": "Clinical Large Language Models with Multi-Stage Instruction Tuning and Advanced Retrieval-Augmented Generation",
+          "score": 0.468956
+        },
+        {
+          "paper_id": "10.20944/preprints202604.0339.v1",
+          "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
+          "score": 0.454834
+        }
+      ],
+      "delta": {
+        "baseline_expected_rank": 1,
+        "corrupted_expected_rank": 1,
+        "expected_top_1_lost": false,
+        "top_1_changed": false
+      }
+    }
+  ],
+  "baseline_integrity": {
+    "collection": "papers-baseline",
+    "documents_before": 24,
+    "documents_after": 24,
+    "fingerprint_before": "ad3c36af25ee5bb0d5070f590f7c299ccc040aaad07ccb86e00a57b2eae421e6",
+    "fingerprint_after": "ad3c36af25ee5bb0d5070f590f7c299ccc040aaad07ccb86e00a57b2eae421e6",
+    "logical_content_unchanged": true
+  }
+}
