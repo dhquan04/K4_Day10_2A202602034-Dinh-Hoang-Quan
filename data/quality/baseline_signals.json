@@ -1,0 +1,138 @@
+{
+  "generated_at": "2026-08-06T09:32:49.453043+00:00",
+  "purpose": "Baseline signals frozen at CP2 for post-corruption comparison.",
+  "quality": {
+    "report_name": "baseline_quality",
+    "passed": true,
+    "row_count": 24,
+    "checks": [
+      {
+        "check": "row_count",
+        "status": "pass",
+        "value": 24,
+        "detail": "24 rows"
+      },
+      {
+        "check": "paper_id_not_null",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 null/blank paper_id values"
+      },
+      {
+        "check": "paper_id_unique",
+        "status": "pass",
+        "value": 24,
+        "detail": "0 duplicate rows across 24 unique ids"
+      },
+      {
+        "check": "title_not_null",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 rows missing title"
+      },
+      {
+        "check": "summary_not_null",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 rows missing summary"
+      },
+      {
+        "check": "summary_min_length",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 summaries shorter than 40 characters"
+      },
+      {
+        "check": "text_for_embedding_present",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 rows missing text_for_embedding"
+      },
+      {
+        "check": "age_days_present",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 rows missing age_days"
+      },
+      {
+        "check": "age_days_non_negative",
+        "status": "pass",
+        "value": 0,
+        "detail": "0 rows with negative age_days"
+      }
+    ]
+  },
+  "freshness": {
+    "is_fresh": true,
+    "stale_rows": 0,
+    "total_rows": 24,
+    "freshness_threshold_days": 180,
+    "latest_published": "2026-08-05",
+    "oldest_published": "2026-02-12",
+    "mean_age_days": 77.75,
+    "max_age_days": 175
+  },
+  "embedding_audit": {
+    "report_name": "embedding_audit_baseline",
+    "generated_at": "2026-08-06T09:32:49.452032+00:00",
+    "manifest_path": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+    "collection_name": "papers-baseline",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "backend": "chroma",
+    "document_count": 24,
+    "unique_paper_ids": 24,
+    "passed": true,
+    "checks": [
+      {
+        "check": "manifest_exists",
+        "status": "pass",
+        "detail": "found manifest at D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+        "dimension": "availability"
+      },
+      {
+        "check": "collection_name",
+        "status": "pass",
+        "detail": "collection_name='papers-baseline', expected='papers-baseline'",
+        "value": "papers-baseline",
+        "expected": "papers-baseline",
+        "dimension": "validity"
+      },
+      {
+        "check": "embedding_model_present",
+        "status": "pass",
+        "detail": "sentence-transformers/all-MiniLM-L6-v2",
+        "value": "sentence-transformers/all-MiniLM-L6-v2",
+        "dimension": "completeness"
+      },
+      {
+        "check": "backend_present",
+        "status": "pass",
+        "detail": "chroma",
+        "value": "chroma",
+        "dimension": "completeness"
+      },
+      {
+        "check": "document_count_positive",
+        "status": "pass",
+        "detail": "24 documents",
+        "value": 24,
+        "dimension": "completeness"
+      },
+      {
+        "check": "paper_id_unique_in_manifest",
+        "status": "pass",
+        "detail": "24 unique paper_id across 24 documents",
+        "value": 24,
+        "dimension": "uniqueness"
+      },
+      {
+        "check": "document_count_matches_clean",
+        "status": "pass",
+        "detail": "manifest=24, clean=24",
+        "value": 24,
+        "expected": 24,
+        "dimension": "consistency"
+      }
+    ]
+  }
+}

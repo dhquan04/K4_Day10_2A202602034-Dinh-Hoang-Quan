@@ -3,7 +3,7 @@
 **Nhóm:** ChickenFarmer  
 **Vai trò:** Evaluation & observability owner (`eval|observe`)  
 **Phạm vi:** `src/evaluation/testset.py`, `src/observability/quality.py`, `data/eval/`, `data/quality/`  
-**Checkpoint:** CP0 và CP1
+**Checkpoint:** CP0, CP1 và CP2
 
 ## Checkpoint 0 — Contract evaluation & observability
 
@@ -109,3 +109,39 @@ python script/run_role5_cp1.py
 ### Kết luận CP1
 
 Role 5 đã implement observability checks và evaluation set builder. Các artifact baseline quality/freshness/test set sẵn sàng cho handoff sang index (CP2) và baseline evaluation (CP3).
+
+## Checkpoint 2 — Test set cố định, audit index & khung report
+
+### Mục tiêu phần việc
+
+Khóa evaluation set trên clean + index, audit embedding manifest, đóng băng baseline quality/freshness signals, và chuẩn bị khuôn `phase1_report` (metrics để trống cho CP3).
+
+### Việc đã làm (Role 5)
+
+| # | Việc CP2 | Trạng thái | Evidence |
+| --- | --- | --- | --- |
+| 1 | `build_test_set` đủ `id` / `question_type` / `question` / `ground_truth` / `ground_truth_doc_ids` | Done | `src/evaluation/testset.py` |
+| 2 | Question từ cleaned data; ID phải có trong index | Done | `build_test_set(..., indexed_paper_ids=...)` + `validate_test_set_against_index` |
+| 3 | Lưu test set cố định và preview vài row | Done | `data/eval/test_set.json` (8 câu); `preview_test_set()` |
+| 4 | Audit embedding manifest / collection / document count | Done | `audit_embedding_manifest()` → `data/quality/embedding_audit_baseline.json` |
+| 5 | Freeze baseline quality/freshness signals | Done | `freeze_baseline_signals()` → `data/quality/baseline_signals.json` |
+| 6 | Khuôn phase1 report (metrics fill ở CP3) | Done | `generate_phase1_report()` → `data/reports/phase1_report.md` |
+
+### Kết quả audit hiện tại
+
+- Embedding manifest: `papers-baseline`, 24 documents, khớp clean 24 rows, **passed**
+- Quality: **passed**, Freshness: **is_fresh=true** (0 stale / threshold 180)
+- Test set: 8 samples; mọi `ground_truth_doc_ids` có trong embedding manifest
+
+### Phụ thuộc / blocker từ role khác
+
+| Role | Cần gì | Trạng thái |
+| --- | --- | --- |
+| Cleaning | `data/clean/papers_clean.{csv,json}` | Có |
+| RAG | `data/embeddings/papers_embeddings.json` | Có (manifest audit OK) |
+| RAG | Chroma persist `data/chroma/` cho smoke search/lookup thật | **Thiếu / trống** — Role 5 chỉ audit được manifest JSON; cần Role RAG xác nhận collection `papers-baseline` load được |
+| Lead | `phase1.py` gọi test set → evaluate → quality → report | **Chưa** (đúng lịch CP3) |
+
+### Ngoài phạm vi Role 5 ở CP2
+
+Không sửa: `phase1.py`, `corruption_flow.py`, `retrieval/*`, `cleaning.py`, `crossref.py`, `generate_corruption_report` (CP5/CP6).
