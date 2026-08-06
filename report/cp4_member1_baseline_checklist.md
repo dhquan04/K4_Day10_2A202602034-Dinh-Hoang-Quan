@@ -5,7 +5,7 @@
 
 ## Kết luận handoff
 
-Các artifact logic của baseline đã đủ để chuẩn bị CP5. Tuy nhiên, trạng thái **baseline index chưa được khóa hoàn toàn** vì Git đang báo ba file thuộc `data/chroma/` đã thay đổi. Không được rebuild hoặc ghi vào collection `papers-baseline` cho đến khi chủ sở hữu index xác nhận các thay đổi này vô hại hoặc khôi phục snapshot phù hợp.
+Các artifact baseline đã đủ để bàn giao CP5. Sau lần đồng bộ gần nhất, working tree sạch và collection `papers-baseline` đã được xác minh lại có 24 documents. Bộ query baseline được khóa trong `report/cp5_corruption_plan_and_role4_baseline_lock.md`; CP5 chỉ được tạo và dùng collection `papers-corrupted`.
 
 ## Checklist
 
@@ -14,12 +14,12 @@ Các artifact logic của baseline đã đủ để chuẩn bị CP5. Tuy nhiên
 | Raw source để repair | PASS | `data/raw/crossref_response.json`, `data/raw/crossref_records.json`; raw records = 24 |
 | Clean baseline | PASS | `data/clean/papers_clean.json`; clean records = 24 |
 | Lineage raw → clean → index | PASS | `report/role2_checkpoint_3.md`; `data/results/role4_cp3_verification.json` |
-| Test set cố định | PASS | `data/eval/test_set.json`; 8 samples; dùng nguyên file này cho baseline/corrupted/repaired |
+| Test set cố định | PASS | `data/eval/test_set.json`; 8 samples; SHA-256 `D4BA5764269EFE3D32EF4C3873ABD393C16AFB9D90C34FC337AD66981F4F6450`; dùng nguyên file này cho baseline/corrupted/repaired |
 | Query / RAG baseline | PASS | collection `papers-baseline`, 24 documents; CP3 verification có `status: pass` |
 | Baseline answers & metrics | PASS | `data/results/baseline_answers.json`, `data/results/baseline_metrics.json` |
 | Baseline quality & freshness | PASS | `data/quality/baseline_quality.json`, `data/quality/baseline_signals.json`, `data/quality/freshness_report.json` |
-| Index baseline không mutate | HOLD | `data/chroma/chroma.sqlite3`, `data_level0.bin`, `length.bin` đang modified theo Git status; cần xác nhận/khóa trước CP5 |
-| Corruption flow sẵn sàng chạy | BLOCKED | `src/ingestion/corruption.py` và `src/pipelines/corruption_flow.py` còn `NotImplementedError` |
+| Index baseline không mutate | PASS | Working tree sạch; `papers-baseline` đã xác minh 24 documents; query/collection lock: `report/cp5_corruption_plan_and_role4_baseline_lock.md` |
+| Corruption flow sẵn sàng chạy | PASS | `src/ingestion/corruption.py` và `src/pipelines/corruption_flow.py` đã có implementation; handoff corrupted/log ở `data/clean/papers_clean_corrupted.json` và `data/results/corruption_log.json` |
 
 ## Fingerprint snapshot
 
@@ -32,13 +32,13 @@ Các hash SHA-256 sau là mốc đối chiếu trước/sau CP5. Bất kỳ thay
 | `data/clean/papers_clean.json` | `EC7AD1E074093FA0A48E4022DC8EAFFB623558013F0675AD64359761340F530A` |
 | `data/eval/test_set.json` | `D4BA5764269EFE3D32EF4C3873ABD393C16AFB9D90C34FC337AD66981F4F6450` |
 | `data/results/baseline_metrics.json` | `D59B8018664583439C40B0CD8AB477F15078DC07C41FE0CFE4BDA0C7AFA40A97` |
-| `data/quality/baseline_signals.json` | `353F282071F77A1905B6548C313D985A4090814E2D47B2CB30FC3BBBA2D33BC9` |
+| `data/quality/baseline_signals.json` | `DC55E4626CCF80A7BF1B84E209D9F45D475B623193B6F57BD0E61C440047EBC5` |
 | `data/results/role4_cp3_verification.json` | `E2AC35E7F75BA150041D2F18B74A6E3E11F0E48DE9C70076A092C63256479032` |
 
 ## Blocker và hành động chuyển CP5
 
-1. **Owner index (Thành viên 4):** xác nhận `papers-baseline` vẫn có 24 documents và dừng mọi thao tác ghi vào `data/chroma/`. Corruption phải dùng collection tách biệt `papers-corrupted`.
-2. **Owner corruption (Thành viên 3):** implement `corrupt_clean_dataframe` và `corruption_flow`; ghi log gồm ID, loại corruption, tham số, số record trước/sau; output phải nằm ở các artifact corrupted/repaired riêng.
+1. **Owner index (Thành viên 4):** duy trì collection `papers-baseline` ở 24 documents; corruption chỉ dùng collection tách biệt `papers-corrupted`.
+2. **Owner corruption (Thành viên 3):** giữ corruption log là nguồn sự thật cho ID, loại, tham số và số record trước/sau; output phải nằm ở các artifact corrupted/repaired riêng.
 3. **Owner source (Thành viên 2):** giữ nguyên hai raw artifacts ở trên; repair chỉ đọc từ snapshot này, không gọi fetch mới.
 4. **Owner evaluation (Thành viên 5):** dùng đúng test-set hash ở trên khi evaluate corrupted và repaired; liên kết corruption log → quality/freshness signal → metric chỉ khi có evidence.
 

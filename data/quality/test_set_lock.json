@@ -2,9 +2,9 @@
   "locked_at": "2026-08-06T10:18:58.082561+00:00",
   "checkpoint": "CP4",
   "role": "eval|observe",
-  "path": "D:/AIThucChien/thuchanh/Day10-Nhom/K4_Day10_Nhom-ChickenFarmer/data/eval/test_set.json",
+  "path": "data/eval/test_set.json",
   "samples": 8,
-  "sha256": "656f039f10d8218b8d8ce5f8a8760065a18aa552d310e169d9311de87fa81527",
+  "sha256": "d4ba5764269efe3d32ef4c3873abd393c16afb9d90c34fc337ad66981f4f6450",
   "question_ids": [
     "summary-01",
     "summary-02",
