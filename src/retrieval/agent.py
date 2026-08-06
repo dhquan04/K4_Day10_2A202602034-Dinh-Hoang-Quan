@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 from langchain.agents import create_agent
@@ -8,6 +9,27 @@ from langchain.tools import tool
 from core.config import Settings
 from retrieval.index import LocalEmbeddingIndex
 from retrieval.llm import build_llm
+
+
+@dataclass(frozen=True)
+class AgentRunResult:
+    answer: str
+    tool_calls: list[str]
+    tool_outputs: list[dict[str, str]]
+
+
+def _content_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict) and block.get("text"):
+                parts.append(str(block["text"]))
+            elif getattr(block, "text", None):
+                parts.append(str(block.text))
+        return "\n".join(parts)
+    return str(content)
 
 
 def build_agent(settings: Settings, index: LocalEmbeddingIndex):
@@ -50,10 +72,36 @@ def build_agent(settings: Settings, index: LocalEmbeddingIndex):
     )
 
 
-def run_agent_question(agent: Any, question: str) -> str:
+def run_agent_with_trace(agent: Any, question: str) -> AgentRunResult:
+    """Run one agent turn and retain evidence that retrieval tools were used."""
     result = agent.invoke({"messages": [{"role": "user", "content": question}]})
     messages = result.get("messages", [])
     if not messages:
-        return ""
+        return AgentRunResult(answer="", tool_calls=[], tool_outputs=[])
+
+    tool_calls: list[str] = []
+    tool_outputs: list[dict[str, str]] = []
+    for message in messages:
+        for call in getattr(message, "tool_calls", None) or []:
+            name = call.get("name") if isinstance(call, dict) else getattr(call, "name", None)
+            if name:
+                tool_calls.append(str(name))
+        if getattr(message, "type", "") == "tool":
+            tool_outputs.append(
+                {
+                    "name": str(getattr(message, "name", "unknown")),
+                    "content": _content_text(getattr(message, "content", "")),
+                }
+            )
+
     final_message = messages[-1]
-    return getattr(final_message, "content", str(final_message))
+    answer = _content_text(getattr(final_message, "content", str(final_message)))
+    return AgentRunResult(
+        answer=answer,
+        tool_calls=tool_calls,
+        tool_outputs=tool_outputs,
+    )
+
+
+def run_agent_question(agent: Any, question: str) -> str:
+    return run_agent_with_trace(agent, question).answer

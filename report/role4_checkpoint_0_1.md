@@ -140,20 +140,54 @@ chuỗi rỗng theo clean contract, nhưng không được là null.
 chọn rỗng được pass; `paper_id` trùng và `text_for_embedding` rỗng bị reject
 đúng như mong đợi.
 
-Hiện chưa có clean artifact thực tế trong `data/clean/`; lệnh
-`python script/validate_clean.py` trả về `SKIP` đúng như thiết kế. Vì vậy phần
-xác minh handoff trên dữ liệu thật vẫn chờ role Cleaning hoàn thành
-`build_clean_dataframe()` và ghi clean CSV/JSON.
+Clean artifact đã được bàn giao tại `data/clean/papers_clean.json`. Role 4 đã
+chạy lại full clean validation và pre-index guard trên artifact thật:
+
+```powershell
+python script/validate_clean.py `
+  --clean-csv data/clean/_missing.csv `
+  --clean-json data/clean/papers_clean.json
+```
+
+Kết quả nghiệm thu:
+
+| Signal | Kết quả |
+| --- | ---: |
+| Clean validation | PASS |
+| Pre-index validation | PASS |
+| Clean rows | 24 |
+| Unique `paper_id` | 24 |
+| Duplicate `paper_id` | 0 |
+| Empty `text_for_embedding` | 0 |
+| Null trong index metadata | 0 |
+| Raw/clean reconciliation | `24 = 24 + 0 dropped` |
+
+JSON được dùng làm artifact canonical cho bước nghiệm thu vì giữ nguyên newline
+và list fields trên mọi hệ điều hành. Bản CSV trên Windows có thể chuyển newline
+trong `text_for_embedding` từ `\n` thành `\r\n`, làm validator so sánh chuỗi
+tuyệt đối báo false fail dù nội dung không thay đổi.
+
+Query smoke test đã chốt từ dữ liệu thật:
+
+1. Exact lookup theo `paper_id`: `10.2118/234689-pa`.
+2. Semantic query: `SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation`.
+3. Semantic query: `JADE-Plus: A Multimodal Agentic Retrieval-Augmented Generation Large Language Framework for Diagnostic Support in Jawbone Lesions: Development and Technical Validation Study`.
+4. Semantic query: `Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis`.
+
+Các query trên sau đó được chạy ở CP2; cả ba semantic query đều trả source paper
+tương ứng ở top-1. Evidence: `data/results/agent_demo_answers.json`.
 
 CP1 hoàn tất khi:
 
-- [ ] Cleaned DataFrame có đủ schema cho index.
-- [ ] `paper_id` unique; `text_for_embedding` và metadata hợp lệ.
-- [ ] Có số lượng record clean đã xác minh.
-- [ ] Có một exact-lookup query và 2–3 semantic queries từ dữ liệu thật.
-- [ ] Các vấn đề data contract đã được phản hồi cho role Cleaning, nếu có.
-- [ ] Chưa build hoặc ghi đè collection `papers-baseline`.
+- [x] Cleaned DataFrame có đủ schema cho index.
+- [x] `paper_id` unique; `text_for_embedding` và metadata hợp lệ.
+- [x] Số lượng clean records đã xác minh: 24.
+- [x] Có một exact-lookup query và ba semantic queries từ dữ liệu thật.
+- [x] Không phát hiện lỗi data contract cần trả lại role Cleaning.
+- [x] Pre-index handoff được nghiệm thu trước khi build `papers-baseline` ở CP2.
 
 ### Kết luận CP1
 
-Role RAG sẽ chỉ chuyển sang build MiniLM embeddings và Chroma collection ở checkpoint 2 sau khi clean schema được xác minh. Việc này bảo đảm baseline index, evaluation và so sánh corrupted/repaired dùng dữ liệu có contract ổn định.
+CP1 của Role 4 đã được nghiệm thu trên clean artifact thật. Clean schema và
+retrieval boundary đều PASS, vì vậy dữ liệu đủ điều kiện để build MiniLM
+embeddings và Chroma collection ở CP2.
