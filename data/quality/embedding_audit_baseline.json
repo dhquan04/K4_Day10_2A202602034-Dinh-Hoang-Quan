@@ -1,0 +1,63 @@
+{
+  "report_name": "embedding_audit_baseline",
+  "generated_at": "2026-08-06T09:32:49.452032+00:00",
+  "manifest_path": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+  "collection_name": "papers-baseline",
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "backend": "chroma",
+  "document_count": 24,
+  "unique_paper_ids": 24,
+  "passed": true,
+  "checks": [
+    {
+      "check": "manifest_exists",
+      "status": "pass",
+      "detail": "found manifest at D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+      "dimension": "availability"
+    },
+    {
+      "check": "collection_name",
+      "status": "pass",
+      "detail": "collection_name='papers-baseline', expected='papers-baseline'",
+      "value": "papers-baseline",
+      "expected": "papers-baseline",
+      "dimension": "validity"
+    },
+    {
+      "check": "embedding_model_present",
+      "status": "pass",
+      "detail": "sentence-transformers/all-MiniLM-L6-v2",
+      "value": "sentence-transformers/all-MiniLM-L6-v2",
+      "dimension": "completeness"
+    },
+    {
+      "check": "backend_present",
+      "status": "pass",
+      "detail": "chroma",
+      "value": "chroma",
+      "dimension": "completeness"
+    },
+    {
+      "check": "document_count_positive",
+      "status": "pass",
+      "detail": "24 documents",
+      "value": 24,
+      "dimension": "completeness"
+    },
+    {
+      "check": "paper_id_unique_in_manifest",
+      "status": "pass",
+      "detail": "24 unique paper_id across 24 documents",
+      "value": 24,
+      "dimension": "uniqueness"
+    },
+    {
+      "check": "document_count_matches_clean",
+      "status": "pass",
+      "detail": "manifest=24, clean=24",
+      "value": 24,
+      "expected": 24,
+      "dimension": "consistency"
+    }
+  ]
+}

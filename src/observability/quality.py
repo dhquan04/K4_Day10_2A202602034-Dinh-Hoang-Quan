@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 from core.config import Settings
-from core.utils import now_utc, write_json
+from core.utils import now_utc, read_json, write_json
 
 
 def _check(name: str, passed: bool, detail: str, **extra: Any) -> dict[str, Any]:
@@ -198,4 +199,171 @@ def build_freshness_report(df: pd.DataFrame, settings: Settings, report_path) ->
         "max_age_days": int(age_days.max()),
     }
     write_json(report_path, payload)
+    return payload
+
+
+def audit_embedding_manifest(
+    settings: Settings,
+    report_name: str = "embedding_audit_baseline",
+    expected_collection_name: str | None = None,
+    clean_row_count: int | None = None,
+) -> dict[str, Any]:
+    """Audit embedding manifest collection name and document counts for CP2 handoff."""
+    manifest_path = Path(settings.paths.embeddings_json)
+    expected_collection = expected_collection_name or settings.baseline_collection_name
+    checks: list[dict[str, Any]] = []
+
+    if not manifest_path.exists():
+        report = {
+            "report_name": report_name,
+            "generated_at": now_utc().isoformat(),
+            "manifest_path": str(manifest_path),
+            "collection_name": None,
+            "embedding_model": None,
+            "backend": None,
+            "document_count": 0,
+            "unique_paper_ids": 0,
+            "passed": False,
+            "checks": [
+                _check(
+                    "manifest_exists",
+                    False,
+                    f"missing manifest at {manifest_path}",
+                    dimension="availability",
+                )
+            ],
+        }
+        write_json(settings.paths.quality_dir / f"{report_name}.json", report)
+        return report
+
+    payload = read_json(manifest_path)
+    documents = payload.get("documents") or []
+    paper_ids = [str(doc.get("paper_id", "")).strip() for doc in documents]
+    unique_paper_ids = len({paper_id for paper_id in paper_ids if paper_id})
+    document_count = len(documents)
+    collection_name = payload.get("collection_name")
+    embedding_model = payload.get("embedding_model")
+    backend = payload.get("backend")
+
+    checks.append(
+        _check(
+            "manifest_exists",
+            True,
+            f"found manifest at {manifest_path}",
+            dimension="availability",
+        )
+    )
+    checks.append(
+        _check(
+            "collection_name",
+            collection_name == expected_collection,
+            f"collection_name={collection_name!r}, expected={expected_collection!r}",
+            value=collection_name,
+            expected=expected_collection,
+            dimension="validity",
+        )
+    )
+    checks.append(
+        _check(
+            "embedding_model_present",
+            bool(embedding_model),
+            str(embedding_model) if embedding_model else "missing embedding_model",
+            value=embedding_model,
+            dimension="completeness",
+        )
+    )
+    checks.append(
+        _check(
+            "backend_present",
+            bool(backend),
+            str(backend) if backend else "missing backend",
+            value=backend,
+            dimension="completeness",
+        )
+    )
+    checks.append(
+        _check(
+            "document_count_positive",
+            document_count > 0,
+            f"{document_count} documents",
+            value=document_count,
+            dimension="completeness",
+        )
+    )
+    checks.append(
+        _check(
+            "paper_id_unique_in_manifest",
+            unique_paper_ids == document_count and document_count > 0,
+            f"{unique_paper_ids} unique paper_id across {document_count} documents",
+            value=unique_paper_ids,
+            dimension="uniqueness",
+        )
+    )
+    if clean_row_count is not None:
+        checks.append(
+            _check(
+                "document_count_matches_clean",
+                document_count == clean_row_count,
+                f"manifest={document_count}, clean={clean_row_count}",
+                value=document_count,
+                expected=clean_row_count,
+                dimension="consistency",
+            )
+        )
+
+    report = {
+        "report_name": report_name,
+        "generated_at": now_utc().isoformat(),
+        "manifest_path": str(manifest_path),
+        "collection_name": collection_name,
+        "embedding_model": embedding_model,
+        "backend": backend,
+        "document_count": document_count,
+        "unique_paper_ids": unique_paper_ids,
+        "passed": all(check["status"] == "pass" for check in checks),
+        "checks": checks,
+    }
+    write_json(settings.paths.quality_dir / f"{report_name}.json", report)
+    return report
+
+
+def freeze_baseline_signals(
+    settings: Settings,
+    quality: dict[str, Any],
+    freshness: dict[str, Any],
+    embedding_audit: dict[str, Any] | None = None,
+    output_name: str = "baseline_signals.json",
+) -> dict[str, Any]:
+    """Freeze baseline quality/freshness signals for post-corruption comparison."""
+    payload: dict[str, Any] = {
+        "generated_at": now_utc().isoformat(),
+        "purpose": "Baseline signals frozen at CP2 for post-corruption comparison.",
+        "quality": {
+            "report_name": quality.get("report_name"),
+            "passed": quality.get("passed"),
+            "row_count": quality.get("row_count"),
+            "checks": [
+                {
+                    "check": item.get("check"),
+                    "status": item.get("status"),
+                    "value": item.get("value"),
+                    "detail": item.get("detail"),
+                }
+                for item in quality.get("checks", [])
+            ],
+        },
+        "freshness": {
+            "is_fresh": freshness.get("is_fresh"),
+            "stale_rows": freshness.get("stale_rows"),
+            "total_rows": freshness.get("total_rows"),
+            "freshness_threshold_days": freshness.get("freshness_threshold_days"),
+            "latest_published": freshness.get("latest_published"),
+            "oldest_published": freshness.get("oldest_published"),
+            "mean_age_days": freshness.get("mean_age_days"),
+            "max_age_days": freshness.get("max_age_days"),
+        },
+    }
+    if embedding_audit is not None:
+        payload["embedding_audit"] = embedding_audit
+    write_json(settings.paths.quality_dir / output_name, payload)
     return payload
