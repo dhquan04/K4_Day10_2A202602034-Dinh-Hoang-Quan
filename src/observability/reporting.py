@@ -2,6 +2,15 @@ from __future__ import annotations
 
 from typing import Any
 
+from core.utils import write_text
+
+
+def _metric_value(metrics: dict[str, Any], key: str) -> Any:
+    if not metrics or key not in metrics:
+        return "N/A (fill at CP3)"
+    value = metrics[key]
+    return value if value is not None else "N/A (fill at CP3)"
+
 
 def generate_phase1_report(
     report_path,
@@ -10,15 +19,94 @@ def generate_phase1_report(
     quality: dict[str, Any],
     freshness: dict[str, Any],
 ) -> None:
-    """TODO(student): viet markdown report cho baseline phase.
+    """Write the baseline phase-1 markdown report.
 
-    Pseudo-code:
-    1. Gom source summary.
-    2. In metrics retrieval/evaluation.
-    3. In data quality va freshness.
-    4. Ghi markdown vao report_path.
+    At CP2 this may be called with empty/partial metrics; quality and freshness
+    should already contain real baseline signals. CP3 fills evaluation metrics.
     """
-    raise NotImplementedError("Student task: implement phase 1 report.")
+    source_summary = source_summary or {}
+    metrics = metrics or {}
+    quality = quality or {}
+    freshness = freshness or {}
+
+    quality_rows = []
+    for check in quality.get("checks", []):
+        quality_rows.append(
+            "| {check} | {dimension} | {status} | {detail} |".format(
+                check=check.get("check", ""),
+                dimension=check.get("dimension", ""),
+                status=check.get("status", ""),
+                detail=str(check.get("detail", "")).replace("|", "/"),
+            )
+        )
+    if not quality_rows:
+        quality_rows.append("| N/A | N/A | N/A | No quality checks yet |")
+
+    lines = [
+        "# Phase 1 Baseline Report",
+        "",
+        "> Khung report (Role 5 / observability). Số liệu metrics đầy đủ sau khi Lead chạy `phase1` ở CP3.",
+        "",
+        "## 1. Source summary",
+        "",
+        "| Thuộc tính | Giá trị |",
+        "| --- | --- |",
+        f"| Source | {source_summary.get('source', 'N/A')} |",
+        f"| Query | {source_summary.get('query', 'N/A')} |",
+        f"| Filter | {source_summary.get('filter', 'N/A')} |",
+        f"| Raw records | {source_summary.get('raw_records', 'N/A')} |",
+        f"| Clean records | {source_summary.get('clean_records', 'N/A')} |",
+        f"| Fetched at | {source_summary.get('fetched_at', 'N/A (fill at CP3)')} |",
+        "",
+        "## 2. Evaluation metrics",
+        "",
+        "| Metric | Giá trị |",
+        "| --- | --- |",
+        f"| samples | {_metric_value(metrics, 'samples')} |",
+        f"| retrieval_hit_rate | {_metric_value(metrics, 'retrieval_hit_rate')} |",
+        f"| mean_token_f1 | {_metric_value(metrics, 'mean_token_f1')} |",
+        f"| judge_accuracy | {_metric_value(metrics, 'judge_accuracy')} |",
+        f"| mean_judge_score | {_metric_value(metrics, 'mean_judge_score')} |",
+        f"| ragas | {_metric_value(metrics, 'ragas')} |",
+        "",
+        "## 3. Data quality",
+        "",
+        "| Check | Dimension | Status | Detail |",
+        "| --- | --- | --- | --- |",
+        *quality_rows,
+        "",
+        f"Overall quality passed: `{quality.get('passed', 'N/A')}`",
+        "",
+        "## 4. Freshness",
+        "",
+        "| Thuộc tính | Giá trị |",
+        "| --- | --- |",
+        f"| freshness_threshold_days | {freshness.get('freshness_threshold_days', 'N/A')} |",
+        f"| latest_published | {freshness.get('latest_published', 'N/A')} |",
+        f"| oldest_published | {freshness.get('oldest_published', 'N/A')} |",
+        f"| mean_age_days | {freshness.get('mean_age_days', 'N/A')} |",
+        f"| max_age_days | {freshness.get('max_age_days', 'N/A')} |",
+        f"| stale_rows | {freshness.get('stale_rows', 'N/A')} |",
+        f"| total_rows | {freshness.get('total_rows', 'N/A')} |",
+        f"| is_fresh | {freshness.get('is_fresh', 'N/A')} |",
+        "",
+        "## 5. Evidence paths",
+        "",
+        "- Clean dataset: `data/clean/papers_clean.{csv,json}`",
+        "- Evaluation set: `data/eval/test_set.json`",
+        "- Embedding manifest: `data/embeddings/papers_embeddings.json`",
+        "- Quality: `data/quality/`",
+        "- Metrics: `data/results/baseline_metrics.json`",
+        "- Answers: `data/results/baseline_answers.json`",
+        "",
+        "## 6. Notes for CP3",
+        "",
+        "- Điền metrics từ `evaluate_pipeline` (không hard-code).",
+        "- Giải thích ít nhất một retrieval hit/miss bằng `baseline_answers.json`.",
+        "- Đối chiếu quality/freshness với artifact JSON trong `data/quality/`.",
+        "",
+    ]
+    write_text(report_path, "\n".join(lines))
 
 
 def generate_corruption_report(
