@@ -112,7 +112,7 @@ Mặc định project dùng Gemini:
 
 ```dotenv
 LLM_PROVIDER=gemini
-LLM_MODEL=gemini-2.5-flash
+LLM_MODEL=gemini-3.6-flash
 GOOGLE_API_KEY=your_key_here
 ```
 
