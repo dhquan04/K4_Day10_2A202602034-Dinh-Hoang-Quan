@@ -24,8 +24,8 @@ python script/run_role4_cp2.py
 
 Script đọc `data/clean/papers_clean.json`, validate input tại retrieval boundary,
 build collection baseline, kiểm tra document count, lookup theo ID/title, chạy ba
-semantic queries dựa trên title thật, kiểm tra deterministic QA, sau đó gọi agent
-và yêu cầu sử dụng lookup tool.
+semantic queries ngôn ngữ tự nhiên có ground-truth document ID, kiểm tra
+deterministic QA, sau đó gọi agent và yêu cầu sử dụng lookup tool.
 
 Chroma binary được persist local trong `data/chroma/` và không commit. Manifest
 dùng path tương đối `data/chroma` để có thể load lại trên workspace khác.
@@ -41,7 +41,7 @@ dùng path tương đối `data/chroma` để có thể load lại trên workspa
 | Manifest count | 24 |
 | Exact lookup theo `paper_id` | PASS |
 | Exact lookup theo title | PASS |
-| Semantic search | PASS, 3/3 source papers xuất hiện top-k và đều đứng top-1 |
+| Semantic search | PASS, 3/3 query ngôn ngữ tự nhiên trả source paper trong top-k |
 | Deterministic factual QA | PASS |
 | Agent tool usage | PASS, gọi `lookup_paper` và nhận tool output có nguồn |
 | Load lại collection từ manifest khi offline | PASS |
@@ -56,6 +56,15 @@ title: SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented
 
 Agent trả lời tác giả dựa trên output của `lookup_paper`: Qianwen Cao, Chiyu
 Zhang, Junxiong Ning và Gongru Li.
+
+Ba semantic query có thể kiểm chứng:
+
+1. `Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?`
+   → `10.2118/234689-pa`.
+2. `Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?`
+   → `10.1007/s10278-026-02086-9`.
+3. `Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?`
+   → `10.21203/rs.3.rs-10178277/v1`.
 
 ## 4. Artifacts
 
@@ -91,7 +100,6 @@ retrieval results, agent answer, tên tool đã gọi và tool output dùng làm
 
 ## 6. Trạng thái CP2
 
-Phần Role 4 đã hoàn tất và có artifact kiểm chứng. Tiêu chí toàn nhóm của CP2 còn
-`data/eval/test_set.json`, hiện chưa tồn tại và thuộc phần việc Role 5 — Evaluation
-& Observability. Role 4 đã sẵn sàng bàn giao `papers-baseline` và manifest cho
-Role 5.
+Phần Role 4 đã hoàn tất và có artifact kiểm chứng. `data/eval/test_set.json`
+đã được Role 5 tạo sau đó; baseline collection và manifest sẵn sàng để dùng cho
+evaluation ở CP3.

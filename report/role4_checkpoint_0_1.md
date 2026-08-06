@@ -170,12 +170,12 @@ tuyệt đối báo false fail dù nội dung không thay đổi.
 Query smoke test đã chốt từ dữ liệu thật:
 
 1. Exact lookup theo `paper_id`: `10.2118/234689-pa`.
-2. Semantic query: `SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation`.
-3. Semantic query: `JADE-Plus: A Multimodal Agentic Retrieval-Augmented Generation Large Language Framework for Diagnostic Support in Jawbone Lesions: Development and Technical Validation Study`.
-4. Semantic query: `Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis`.
+2. Semantic query: `Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?` → `10.2118/234689-pa`.
+3. Semantic query: `Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?` → `10.1007/s10278-026-02086-9`.
+4. Semantic query: `Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?` → `10.21203/rs.3.rs-10178277/v1`.
 
 Các query trên sau đó được chạy ở CP2; cả ba semantic query đều trả source paper
-tương ứng ở top-1. Evidence: `data/results/agent_demo_answers.json`.
+tương ứng trong top-k. Evidence: `data/results/agent_demo_answers.json`.
 
 CP1 hoàn tất khi:
 

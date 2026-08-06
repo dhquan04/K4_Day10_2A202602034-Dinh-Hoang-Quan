@@ -18,80 +18,80 @@
   },
   "semantic_searches": [
     {
-      "query": "SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation",
+      "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
       "expected_paper_id": "10.2118/234689-pa",
       "retrieved": [
         {
           "paper_id": "10.2118/234689-pa",
           "title": "SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation",
-          "score": 0.749271
-        },
-        {
-          "paper_id": "10.55041/isjem07213",
-          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
-          "score": 0.521328
+          "score": 0.675655
         },
         {
           "paper_id": "10.20944/preprints202604.0339.v1",
           "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
-          "score": 0.493407
+          "score": 0.455182
+        },
+        {
+          "paper_id": "10.55041/isjem07213",
+          "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
+          "score": 0.443581
         },
         {
           "paper_id": "10.21203/rs.3.rs-9770645/v1",
           "title": "Adapting Large Language Models for Low-Resource Regulated Domains: A Fine-Tuning and Retrieval-Augmented Generation Approach to Insurance Information Delivery in Kenya",
-          "score": 0.489908
+          "score": 0.436991
         }
       ]
     },
     {
-      "query": "JADE-Plus: A Multimodal Agentic Retrieval-Augmented Generation Large Language Framework for Diagnostic Support in Jawbone Lesions: Development and Technical Validation Study",
+      "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
       "expected_paper_id": "10.1007/s10278-026-02086-9",
       "retrieved": [
         {
           "paper_id": "10.1007/s10278-026-02086-9",
           "title": "JADE-Plus: A Multimodal Agentic Retrieval-Augmented Generation Large Language Framework for Diagnostic Support in Jawbone Lesions: Development and Technical Validation Study",
-          "score": 0.861626
+          "score": 0.734728
         },
         {
           "paper_id": "10.70121/001c.158711",
           "title": "The Role of Retrieval-Augmented Generation in Improving Factual Accuracy for Medical Large Language Models",
-          "score": 0.444527
+          "score": 0.324202
         },
         {
           "paper_id": "10.1093/sleep/zsag091.0346",
           "title": "0346 Retrieval Augmented Generation Improves Large Language Model Performance in Sleep Medicine",
-          "score": 0.418734
+          "score": 0.304865
         },
         {
-          "paper_id": "10.32473/flairs.39.1.141782",
-          "title": "An Exploratory Study of Agentic Retrieval Augmented Generation for Mental Health Oriented Language Models",
-          "score": 0.404764
+          "paper_id": "10.20944/preprints202602.0996.v1",
+          "title": "Clinical Large Language Models with Multi-Stage Instruction Tuning and Advanced Retrieval-Augmented Generation",
+          "score": 0.235206
         }
       ]
     },
     {
-      "query": "Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis",
+      "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
       "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
       "retrieved": [
         {
           "paper_id": "10.21203/rs.3.rs-10178277/v1",
           "title": "Retrieval-Augmented Large-Language-Model-Based Time-Series Forecasting for Cross-Market Equity Analysis",
-          "score": 0.774443
+          "score": 0.729381
         },
         {
           "paper_id": "10.55041/isjem07213",
           "title": "Speculative Retrieval-Augmented Generation for Cost-Efficient Large Language Model Inference",
-          "score": 0.443858
+          "score": 0.509605
+        },
+        {
+          "paper_id": "10.20944/preprints202604.0339.v1",
+          "title": "Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation",
+          "score": 0.454921
         },
         {
           "paper_id": "10.21203/rs.3.rs-9770645/v1",
           "title": "Adapting Large Language Models for Low-Resource Regulated Domains: A Fine-Tuning and Retrieval-Augmented Generation Approach to Insurance Information Delivery in Kenya",
-          "score": 0.400641
-        },
-        {
-          "paper_id": "10.2118/234689-pa",
-          "title": "SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation",
-          "score": 0.379402
+          "score": 0.45449
         }
       ]
     }
@@ -109,7 +109,7 @@
   },
   "agent": {
     "question": "Who authored 'SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation'? Use the lookup tool and answer only from the indexed corpus.",
-    "answer": "The authors of 'SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation' are:\n\n- Qianwen Cao\n- Chiyu Zhang\n- Junxiong Ning\n- Gongru Li",
+    "answer": "The authors of 'SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation' are:\n\n* **Qianwen Cao**\n* **Chiyu Zhang**\n* **Junxiong Ning**\n* **Gongru Li**",
     "tool_calls": [
       "lookup_paper"
     ],
