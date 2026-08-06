@@ -39,7 +39,7 @@ class IndexInputValidationError(ValueError):
     """Raised when cleaned data cannot safely be written to Chroma."""
 
 
-def validate_index_input(df: pd.DataFrame) -> None:
+def validate_index_input(df: pd.DataFrame, *, allow_intentional_corruption: bool = False) -> None:
     """Check the cleaned-data contract required by the retrieval layer.
 
     Cleaning owns the full schema validation. This smaller guard protects the
@@ -60,7 +60,7 @@ def validate_index_input(df: pd.DataFrame) -> None:
             f"Cannot build retrieval index; {int(invalid_ids.sum())} rows have an empty paper_id."
         )
     duplicate_ids = df["paper_id"].astype(str).str.strip().duplicated(keep=False)
-    if duplicate_ids.any():
+    if duplicate_ids.any() and not allow_intentional_corruption:
         examples = df.loc[duplicate_ids, "paper_id"].astype(str).head(3).tolist()
         raise IndexInputValidationError(
             "Cannot build retrieval index; paper_id must be unique "
@@ -74,7 +74,13 @@ def validate_index_input(df: pd.DataFrame) -> None:
                 f"Cannot build retrieval index; {int(null_values.sum())} rows have null {column}."
             )
 
-    for column in INDEX_NON_EMPTY_COLUMNS:
+    required_non_empty = INDEX_NON_EMPTY_COLUMNS
+    if allow_intentional_corruption:
+        # CP5 deliberately blanks summaries and adds duplicate rows.  Chroma
+        # can store those values, and preserving them is necessary to measure
+        # their retrieval impact rather than silently cleaning them away.
+        required_non_empty = tuple(column for column in INDEX_NON_EMPTY_COLUMNS if column != "summary")
+    for column in required_non_empty:
         missing_values = df[column].astype(str).str.strip().eq("")
         if missing_values.any():
             raise IndexInputValidationError(
@@ -167,8 +173,10 @@ class LocalEmbeddingIndex:
         df: pd.DataFrame,
         settings: Settings,
         embeddings_output_path: Path | None = None,
+        *,
+        allow_intentional_corruption: bool = False,
     ) -> "LocalEmbeddingIndex":
-        validate_index_input(df)
+        validate_index_input(df, allow_intentional_corruption=allow_intentional_corruption)
         collection_name = cls._derive_collection_name(settings, embeddings_output_path)
         documents = cls._build_documents(df)
         persist_path = settings.paths.chroma_dir

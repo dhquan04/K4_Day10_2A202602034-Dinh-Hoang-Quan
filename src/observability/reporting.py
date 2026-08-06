@@ -122,6 +122,54 @@ def generate_corruption_report(
     repaired_quality: dict[str, Any],
     corrupted_freshness: dict[str, Any],
     repaired_freshness: dict[str, Any],
+    *,
+    baseline_quality: dict[str, Any] | None = None,
+    baseline_freshness: dict[str, Any] | None = None,
+    corruption_log: dict[str, Any] | None = None,
 ) -> None:
-    """TODO(student): viet markdown report so sanh baseline/corrupted/repaired."""
-    raise NotImplementedError("Student task: implement corruption comparison report.")
+    """Write an evidence-based baseline/corrupted/repaired comparison."""
+    baseline_quality = baseline_quality or {}
+    baseline_freshness = baseline_freshness or {}
+    corruption_log = corruption_log or {}
+
+    metric_keys = ("samples", "retrieval_hit_rate", "mean_token_f1", "judge_accuracy", "mean_judge_score")
+    metric_rows = [
+        f"| {key} | {baseline_metrics.get(key, 'N/A')} | {corrupted_metrics.get(key, 'N/A')} | {repaired_metrics.get(key, 'N/A')} |"
+        for key in metric_keys
+    ]
+    quality_rows = [
+        f"| quality.passed | {baseline_quality.get('passed', 'N/A')} | {corrupted_quality.get('passed', 'N/A')} | {repaired_quality.get('passed', 'N/A')} |",
+        f"| row_count | {baseline_quality.get('row_count', 'N/A')} | {corrupted_quality.get('row_count', 'N/A')} | {repaired_quality.get('row_count', 'N/A')} |",
+        f"| freshness.is_fresh | {baseline_freshness.get('is_fresh', 'N/A')} | {corrupted_freshness.get('is_fresh', 'N/A')} | {repaired_freshness.get('is_fresh', 'N/A')} |",
+        f"| freshness.stale_rows | {baseline_freshness.get('stale_rows', 'N/A')} | {corrupted_freshness.get('stale_rows', 'N/A')} | {repaired_freshness.get('stale_rows', 'N/A')} |",
+    ]
+    counts = corruption_log.get("counts", {})
+    count_text = ", ".join(f"{name}={value}" for name, value in counts.items()) or "N/A"
+    lines = [
+        "# CP5 Corruption Comparison Report",
+        "",
+        "## Controlled corruption",
+        "",
+        f"- Seed: `{corruption_log.get('seed', 'N/A')}`",
+        f"- Rows: `{corruption_log.get('row_count_before', 'N/A')}` baseline → `{corruption_log.get('row_count_after', 'N/A')}` corrupted",
+        f"- Events: {count_text}",
+        "- Repair source: immutable raw snapshot (`data/raw/crossref_records.json`).",
+        "",
+        "## Evaluation metrics",
+        "",
+        "| Metric | Baseline | Corrupted | Repaired |",
+        "| --- | ---: | ---: | ---: |",
+        *metric_rows,
+        "",
+        "## Quality and freshness signals",
+        "",
+        "| Signal | Baseline | Corrupted | Repaired |",
+        "| --- | --- | --- | --- |",
+        *quality_rows,
+        "",
+        "## Evidence rule",
+        "",
+        "Changes are reported as observed values above. A causal claim is limited to corruption events and signal/metric deltas present in these artifacts; no claim is inferred when the values do not change.",
+        "",
+    ]
+    write_text(report_path, "\n".join(lines))

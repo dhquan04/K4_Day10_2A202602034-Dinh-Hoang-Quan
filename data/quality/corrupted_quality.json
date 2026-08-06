@@ -1,0 +1,72 @@
+{
+  "report_name": "corrupted_quality",
+  "generated_at": "2026-08-06T10:35:17.823539+00:00",
+  "row_count": 24,
+  "passed": false,
+  "checks": [
+    {
+      "check": "row_count",
+      "status": "pass",
+      "detail": "24 rows",
+      "value": 24,
+      "dimension": "completeness"
+    },
+    {
+      "check": "paper_id_not_null",
+      "status": "pass",
+      "detail": "0 null/blank paper_id values",
+      "value": 0,
+      "dimension": "validity"
+    },
+    {
+      "check": "paper_id_unique",
+      "status": "fail",
+      "detail": "4 duplicate rows across 22 unique ids",
+      "value": 22,
+      "duplicate_rows": 4,
+      "dimension": "uniqueness"
+    },
+    {
+      "check": "title_not_null",
+      "status": "pass",
+      "detail": "0 rows missing title",
+      "value": 0,
+      "dimension": "completeness"
+    },
+    {
+      "check": "summary_not_null",
+      "status": "fail",
+      "detail": "2 rows missing summary",
+      "value": 2,
+      "dimension": "completeness"
+    },
+    {
+      "check": "summary_min_length",
+      "status": "fail",
+      "detail": "2 summaries shorter than 40 characters",
+      "value": 2,
+      "dimension": "validity"
+    },
+    {
+      "check": "text_for_embedding_present",
+      "status": "pass",
+      "detail": "0 rows missing text_for_embedding",
+      "value": 0,
+      "dimension": "completeness"
+    },
+    {
+      "check": "age_days_present",
+      "status": "pass",
+      "detail": "0 rows missing age_days",
+      "value": 0,
+      "dimension": "freshness"
+    },
+    {
+      "check": "age_days_non_negative",
+      "status": "pass",
+      "detail": "0 rows with negative age_days",
+      "value": 0,
+      "dimension": "freshness"
+    }
+  ]
+}
