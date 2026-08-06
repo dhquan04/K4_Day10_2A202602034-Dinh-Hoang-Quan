@@ -32,6 +32,24 @@ def _content_text(content: Any) -> str:
     return str(content)
 
 
+def _source_citations(tool_outputs: list[dict[str, str]]) -> list[str]:
+    """Extract concise, auditable citations from retrieval tool output."""
+    citations: list[str] = []
+    for output in tool_outputs:
+        fields: dict[str, str] = {}
+        for line in output["content"].splitlines():
+            if line.startswith("paper_id: "):
+                fields["paper_id"] = line.removeprefix("paper_id: ").strip()
+            elif line.startswith("title: "):
+                fields["title"] = line.removeprefix("title: ").strip()
+        if fields.get("paper_id"):
+            title = fields.get("title", "untitled paper")
+            citation = f"{fields['paper_id']} — {title}"
+            if citation not in citations:
+                citations.append(citation)
+    return citations
+
+
 def build_agent(settings: Settings, index: LocalEmbeddingIndex):
     @tool
     def semantic_search_papers(query: str, top_k: int = 4) -> str:
@@ -66,7 +84,8 @@ def build_agent(settings: Settings, index: LocalEmbeddingIndex):
         system_prompt=(
             "You answer questions about the indexed scholarly paper corpus sourced from Crossref. "
             "Use tools before answering factual questions. "
-            "If the indexed corpus does not support the answer, say so clearly."
+            "If the indexed corpus does not support the answer, say so clearly. "
+            "For every factual answer, include a concise source citation with the paper_id and title."
         ),
         name="paper_corpus_agent",
     )
@@ -96,6 +115,11 @@ def run_agent_with_trace(agent: Any, question: str) -> AgentRunResult:
 
     final_message = messages[-1]
     answer = _content_text(getattr(final_message, "content", str(final_message)))
+    citations = _source_citations(tool_outputs)
+    if citations and "Sources:" not in answer:
+        answer = f"{answer.rstrip()}\n\nSources:\n" + "\n".join(
+            f"- {citation}" for citation in citations
+        )
     return AgentRunResult(
         answer=answer,
         tool_calls=tool_calls,

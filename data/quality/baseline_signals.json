@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T09:32:49.453043+00:00",
+  "generated_at": "2026-08-06T09:53:50.121740+00:00",
   "purpose": "Baseline signals frozen at CP2 for post-corruption comparison.",
   "quality": {
     "report_name": "baseline_quality",
@@ -74,8 +74,8 @@
   },
   "embedding_audit": {
     "report_name": "embedding_audit_baseline",
-    "generated_at": "2026-08-06T09:32:49.452032+00:00",
-    "manifest_path": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+    "generated_at": "2026-08-06T09:53:50.120741+00:00",
+    "manifest_path": "C:\\AI action\\Lab\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
     "collection_name": "papers-baseline",
     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
     "backend": "chroma",
@@ -86,7 +86,7 @@
       {
         "check": "manifest_exists",
         "status": "pass",
-        "detail": "found manifest at D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+        "detail": "found manifest at C:\\AI action\\Lab\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
         "dimension": "availability"
       },
       {

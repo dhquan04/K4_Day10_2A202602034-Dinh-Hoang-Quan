@@ -123,6 +123,8 @@ def main() -> int:
     )
     if not agent_result.tool_calls or not agent_result.tool_outputs:
         raise AssertionError("Agent returned without auditable retrieval tool usage.")
+    if target["paper_id"] not in agent_result.answer:
+        raise AssertionError("Agent factual answer is missing its paper_id source citation.")
 
     payload = {
         "checkpoint": 2,

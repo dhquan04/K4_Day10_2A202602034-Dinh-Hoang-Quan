@@ -1,0 +1,16 @@
+{
+  "raw_records": 24,
+  "clean_records": 24,
+  "test_set_rows": 8,
+  "collection": "papers-baseline",
+  "metrics": {
+    "samples": 8,
+    "retrieval_hit_rate": 1.0,
+    "mean_token_f1": 0.75,
+    "judge_accuracy": 0.75,
+    "mean_judge_score": 4,
+    "ragas": {
+      "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+    }
+  }
+}

@@ -11,18 +11,18 @@
 | Filter | from-pub-date:2026-02-07,has-abstract:true |
 | Raw records | 24 |
 | Clean records | 24 |
-| Fetched at | N/A (fill at CP3) |
+| Fetched at | 2026-08-06T08:07:11.096662+00:00 |
 
 ## 2. Evaluation metrics
 
 | Metric | Giá trị |
 | --- | --- |
-| samples | N/A (fill at CP3) |
-| retrieval_hit_rate | N/A (fill at CP3) |
-| mean_token_f1 | N/A (fill at CP3) |
-| judge_accuracy | N/A (fill at CP3) |
-| mean_judge_score | N/A (fill at CP3) |
-| ragas | N/A (fill at CP3) |
+| samples | 8 |
+| retrieval_hit_rate | 1.0 |
+| mean_token_f1 | 0.75 |
+| judge_accuracy | 0.75 |
+| mean_judge_score | 4 |
+| ragas | {'skipped': 'Set RUN_RAGAS=1 to enable the slower Ragas pass.'} |
 
 ## 3. Data quality
 

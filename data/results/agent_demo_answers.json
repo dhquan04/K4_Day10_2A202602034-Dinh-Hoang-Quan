@@ -60,7 +60,7 @@
         {
           "paper_id": "10.1093/sleep/zsag091.0346",
           "title": "0346 Retrieval Augmented Generation Improves Large Language Model Performance in Sleep Medicine",
-          "score": 0.304865
+          "score": 0.304864
         },
         {
           "paper_id": "10.20944/preprints202602.0996.v1",
@@ -109,7 +109,7 @@
   },
   "agent": {
     "question": "Who authored 'SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation'? Use the lookup tool and answer only from the indexed corpus.",
-    "answer": "The authors of 'SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation' are:\n\n* **Qianwen Cao**\n* **Chiyu Zhang**\n* **Junxiong Ning**\n* **Gongru Li**",
+    "answer": "The paper **\"SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation\"** was authored by:\n\n- **Qianwen Cao**\n- **Chiyu Zhang**\n- **Junxiong Ning**\n- **Gongru Li**\n\n**Source Citation:**\n* **Title:** SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation\n* **Paper ID:** `10.2118/234689-pa`\n\nSources:\n- 10.2118/234689-pa \u2014 SafeRAG: A Large-Language-Model-Based Multistage Retrieval-Augmented Framework for Oil and Gas Safety Report Generation",
     "tool_calls": [
       "lookup_paper"
     ],
