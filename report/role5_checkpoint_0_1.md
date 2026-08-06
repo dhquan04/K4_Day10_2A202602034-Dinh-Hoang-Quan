@@ -3,7 +3,7 @@
 **Nhóm:** ChickenFarmer  
 **Vai trò:** Evaluation & observability owner (`eval|observe`)  
 **Phạm vi:** `src/evaluation/testset.py`, `src/observability/quality.py`, `data/eval/`, `data/quality/`  
-**Checkpoint:** CP0, CP1 và CP2
+**Checkpoint:** CP0, CP1, CP2 và CP3
 
 ## Checkpoint 0 — Contract evaluation & observability
 
@@ -139,9 +139,52 @@ Khóa evaluation set trên clean + index, audit embedding manifest, đóng băng
 | --- | --- | --- |
 | Cleaning | `data/clean/papers_clean.{csv,json}` | Có |
 | RAG | `data/embeddings/papers_embeddings.json` | Có (manifest audit OK) |
-| RAG | Chroma persist `data/chroma/` cho smoke search/lookup thật | **Thiếu / trống** — Role 5 chỉ audit được manifest JSON; cần Role RAG xác nhận collection `papers-baseline` load được |
-| Lead | `phase1.py` gọi test set → evaluate → quality → report | **Chưa** (đúng lịch CP3) |
+| RAG | Chroma persist `data/chroma/` cho smoke search/lookup thật | Có (đã có sau CP2) |
+| Lead | `phase1.py` gọi test set → evaluate → quality → report | Có ở CP3 |
 
 ### Ngoài phạm vi Role 5 ở CP2
 
 Không sửa: `phase1.py`, `corruption_flow.py`, `retrieval/*`, `cleaning.py`, `crossref.py`, `generate_corruption_report` (CP5/CP6).
+
+## Checkpoint 3 — Baseline evaluate, report & đóng mốc
+
+### Mục tiêu phần việc
+
+Đọc kết quả evaluator, giải thích hit/miss + metrics, xác nhận quality/freshness/report khớp artifact, và đóng băng baseline signals/metrics trước giờ nghỉ (CP4).
+
+### Checklist CP3 Role 5
+
+| # | Việc | Trạng thái | Evidence |
+| --- | --- | --- | --- |
+| 1 | Answers + `baseline_metrics.json` | Done (Lead chạy `phase1`; Role 5 xác minh) | `data/results/baseline_{answers,metrics}.json` |
+| 2 | Đọc hit/miss; GT/doc ID hợp lệ | Done | 8/8 retrieval hit; GT IDs đều trong clean+index; gap ở categories answer |
+| 3 | Giải thích metrics | Done | xem mục dưới |
+| 4 | Quality + freshness + `generate_phase1_report` | Done | `data/quality/*`, `data/reports/phase1_report.md` |
+| 5 | Đối chiếu report ↔ JSON | Done | `data/results/role5_cp3_verification.json` |
+| 6 | Freeze baseline signals/metrics | Done | `data/quality/baseline_signals.json` (có `metrics`) |
+
+### Metrics baseline (mốc sau nghỉ)
+
+| Metric | Giá trị | Ý nghĩa |
+| --- | --- | --- |
+| `retrieval_hit_rate` | `1.0` | Tỷ lệ câu hỏi mà ground-truth `paper_id` xuất hiện trong top retrieved docs |
+| `mean_token_f1` | `0.75` | Trung bình F1 token giữa answer và ground_truth (6 câu = 1.0; 2 categories = 0.0) |
+| `judge_accuracy` | `0.75` | Tỷ lệ judge `correct=true` (fallback heuristic vì LLM judge unavailable) |
+| `mean_judge_score` | `4` | Điểm judge trung bình (1–5) |
+
+### Hit / answer-quality gap
+
+- **Hit:** `summary-01` — retrieved đúng `10.1093/sleep/zsag091.0346`, `token_f1=1.0`, judge score 5.
+- **Không có retrieval miss.** Gap chất lượng câu trả lời: `categories-07` / `categories-08` retrieval hit nhưng `answer=""` vì `qa.py` trả `categories_joined` (rỗng trong Crossref clean), trong khi GT là `uncategorized` từ `primary_category` → `token_f1=0`, judge incorrect.
+
+### Phụ thuộc role khác ở CP3
+
+| Role | Cần gì | Trạng thái |
+| --- | --- | --- |
+| Lead | `phase1.py` + artifacts baseline | Có |
+| RAG | Index/chroma để evaluate | Có |
+| RAG / QA | `categories_joined` rỗng → answer categories trống | **Cần lưu ý** (không sửa ngoài phạm vi Role 5) |
+
+### Ngoài phạm vi Role 5 ở CP3
+
+Không sửa: `phase1.py`, `qa.py`, `retrieval/*`, `corruption_*`.

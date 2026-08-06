@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-06T09:53:50.121740+00:00",
-  "purpose": "Baseline signals frozen at CP2 for post-corruption comparison.",
+  "generated_at": "2026-08-06T10:11:11.520402+00:00",
+  "purpose": "Baseline signals/metrics frozen at CP3 for post-corruption comparison.",
   "quality": {
     "report_name": "baseline_quality",
     "passed": true,
@@ -74,8 +74,8 @@
   },
   "embedding_audit": {
     "report_name": "embedding_audit_baseline",
-    "generated_at": "2026-08-06T09:53:50.120741+00:00",
-    "manifest_path": "C:\\AI action\\Lab\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+    "generated_at": "2026-08-06T10:11:11.519341+00:00",
+    "manifest_path": "D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
     "collection_name": "papers-baseline",
     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
     "backend": "chroma",
@@ -86,7 +86,7 @@
       {
         "check": "manifest_exists",
         "status": "pass",
-        "detail": "found manifest at C:\\AI action\\Lab\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
+        "detail": "found manifest at D:\\AIThucChien\\thuchanh\\Day10-Nhom\\K4_Day10_Nhom-ChickenFarmer\\data\\embeddings\\papers_embeddings.json",
         "dimension": "availability"
       },
       {
@@ -134,5 +134,15 @@
         "dimension": "consistency"
       }
     ]
+  },
+  "metrics": {
+    "samples": 8,
+    "retrieval_hit_rate": 1.0,
+    "mean_token_f1": 0.75,
+    "judge_accuracy": 0.75,
+    "mean_judge_score": 4,
+    "ragas": {
+      "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+    }
   }
 }
