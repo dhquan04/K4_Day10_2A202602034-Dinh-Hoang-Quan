@@ -21,7 +21,7 @@
 | `authors` | `И.В. Ермаков, В.В. Филатов` | `И.В. Ермаков, В.В. Филатов` | `И.В. Ермаков, В.В. Филатов` | ✅ Matched |
 
 ## 🛠️ Code Artifacts Added
-- Implemented `trace_paper_lineage(paper_id: str, settings: Settings)` in [`src/ingestion/crossref.py`](file:///e:/lab1/K4_Day10_Nhom-ChickenFarmer/src/ingestion/crossref.py).
+- Implemented `trace_paper_lineage(paper_id: str, settings: Settings)` in `src/ingestion/crossref.py`.
 - Verified snapshot freeze mode in `Settings` (`refresh_source=False`).
 
 ## ✅ Conclusion

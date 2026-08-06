@@ -10,7 +10,7 @@
 - **Recovery Point Helper (`restore_from_raw_snapshot`)**: Tested & Verified (`24/24` records ready for restoration).
 
 ## 🛠️ Code Artifacts Added
-- Implemented `restore_from_raw_snapshot(settings: Settings)` in [`src/ingestion/crossref.py`](file:///e:/lab1/K4_Day10_Nhom-ChickenFarmer/src/ingestion/crossref.py).
+- Implemented `restore_from_raw_snapshot(settings: Settings)` in `src/ingestion/crossref.py`.
 
 ## ✅ Conclusion
 Checkpoint 4 for Role 2 is 100% complete. Raw data sources are frozen and verified as the recovery point for Phase 2 data repair.

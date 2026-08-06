@@ -11,7 +11,7 @@
 | Filter | from-pub-date:2026-02-07,has-abstract:true |
 | Raw records | 24 |
 | Clean records | 24 |
-| Fetched at | 2026-08-06T07:47:16.896756+00:00 |
+| Fetched at | 2026-08-06T08:07:11.096662+00:00 |
 
 ## 2. Evaluation metrics
 
@@ -19,9 +19,9 @@
 | --- | --- |
 | samples | 8 |
 | retrieval_hit_rate | 1.0 |
-| mean_token_f1 | 0.75 |
-| judge_accuracy | 0.75 |
-| mean_judge_score | 4 |
+| mean_token_f1 | 1.0 |
+| judge_accuracy | 1.0 |
+| mean_judge_score | 5 |
 | ragas | {'skipped': 'Set RUN_RAGAS=1 to enable the slower Ragas pass.'} |
 
 ## 3. Data quality

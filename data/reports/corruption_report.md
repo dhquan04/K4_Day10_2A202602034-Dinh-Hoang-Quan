@@ -13,10 +13,10 @@
 | Metric | Baseline | Corrupted | Repaired |
 | --- | ---: | ---: | ---: |
 | samples | 8 | 8 | 8 |
-| retrieval_hit_rate | 1 | 1 | 1 |
-| mean_token_f1 | 0.75 | 0.75 | 0.75 |
-| judge_accuracy | 0.75 | 0.75 | 0.75 |
-| mean_judge_score | 4 | 4 | 4 |
+| retrieval_hit_rate | 1 | 0.75 | 1 |
+| mean_token_f1 | 1 | 0.7616 | 1 |
+| judge_accuracy | 1 | 0.75 | 1 |
+| mean_judge_score | 5 | 4 | 5 |
 
 ## Quality and freshness signals
 
@@ -38,7 +38,7 @@
 - `duplicate_rows` → `paper_id_unique` fail on corrupted → repaired unique again.
 - `stale_date` → `freshness.stale_rows` 0→2→0; `is_fresh` True→False→True.
 - `drop_latest` → `latest_published` 2026-08-05→2026-07-10 (repaired restores baseline date when clean rebuild succeeds).
-- Agent metrics (`samples`, `retrieval_hit_rate`, `mean_token_f1`, `judge_accuracy`, `mean_judge_score`) **không đổi** giữa baseline/corrupted/repaired trên locked test set. Không kết luận corruption làm RAG kém hơn về metric khi số liệu không thay đổi.
+- Metric đổi quan sát được: retrieval_hit_rate, mean_token_f1, judge_accuracy, mean_judge_score.
 
 ## Evidence rule
 

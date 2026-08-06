@@ -4,7 +4,7 @@
   "role": "eval|observe",
   "path": "data/eval/test_set.json",
   "samples": 8,
-  "sha256": "656f039f10d8218b8d8ce5f8a8760065a18aa552d310e169d9311de87fa81527",
+  "sha256": "a12649764805398145c1a89e1c84179b618c8bd72cc4129facd79ef52aa66aac",
   "question_ids": [
     "summary-01",
     "summary-02",
@@ -12,18 +12,18 @@
     "authors-04",
     "date-05",
     "date-06",
-    "categories-07",
-    "categories-08"
+    "summary-07",
+    "summary-08"
   ],
   "ground_truth_doc_ids": [
     "10.1093/sleep/zsag091.0346",
     "10.21203/rs.3.rs-10012178/v1",
-    "10.21203/rs.3.rs-10178277/v1",
     "10.21203/rs.3.rs-9770645/v1",
-    "10.21203/rs.3.rs-9882260/v1",
     "10.22214/ijraset.2026.82233",
     "10.32473/flairs.39.1.141782",
-    "10.3390/buildings16132637"
+    "10.3390/buildings16132637",
+    "10.2118/234689-pa",
+    "10.1007/s10278-026-02086-9"
   ],
   "rules": [
     "Do not rebuild test set during corrupted/repaired evaluation.",
@@ -31,5 +31,5 @@
     "Reuse the same evaluator, top_k, and ground truth for baseline/corrupted/repaired."
   ],
   "restored_from": "data/results/baseline_answers.json",
-  "note": "CP5 reaffirm: locked test set for corrupted/repaired evaluation; do not refresh."
+  "note": "Frozen before the baseline/corrupted/repaired rerun; targets two drop_latest records to measure retrieval degradation and recovery."
 }

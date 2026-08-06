@@ -1,0 +1,175 @@
+{
+  "checkpoint": "CP6",
+  "status": "pass",
+  "scope_frozen": true,
+  "source_refresh_used": false,
+  "raw_snapshot": {
+    "records": 24,
+    "sha256": "cfe7451e6cee059be5c28fa8a38b2c4ccdaa9ac9bc7cfd2d50a121beae2390cd"
+  },
+  "repair_lineage": {
+    "corruption_event_ids": [
+      "10.1007/s10278-026-02086-9",
+      "10.1093/sleep/zsag091.0346",
+      "10.20944/preprints202602.0996.v1",
+      "10.20944/preprints202604.0339.v1",
+      "10.2118/234689-pa",
+      "10.21203/rs.3.rs-10012178/v1",
+      "10.21203/rs.3.rs-9770645/v1",
+      "10.3390/app16052244",
+      "10.3390/buildings16132637",
+      "10.52060/juptik.v4i1.4318",
+      "10.55041/isjem07213",
+      "10.63646/kpqm1958"
+    ],
+    "restored_event_ids": [
+      "10.1007/s10278-026-02086-9",
+      "10.1093/sleep/zsag091.0346",
+      "10.20944/preprints202602.0996.v1",
+      "10.20944/preprints202604.0339.v1",
+      "10.2118/234689-pa",
+      "10.21203/rs.3.rs-10012178/v1",
+      "10.21203/rs.3.rs-9770645/v1",
+      "10.3390/app16052244",
+      "10.3390/buildings16132637",
+      "10.52060/juptik.v4i1.4318",
+      "10.55041/isjem07213",
+      "10.63646/kpqm1958"
+    ],
+    "all_corruption_event_ids_restored": true,
+    "repaired_core_rows_match_baseline": true
+  },
+  "schema_validation": {
+    "passed": true,
+    "row_count": 24
+  },
+  "collections": {
+    "baseline": {
+      "name": "papers-baseline",
+      "documents": 24,
+      "smoke": [
+        {
+          "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
+          "expected_paper_id": "10.2118/234689-pa",
+          "top_1_paper_id": "10.2118/234689-pa",
+          "expected_rank": 1
+        },
+        {
+          "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
+          "expected_paper_id": "10.1007/s10278-026-02086-9",
+          "top_1_paper_id": "10.1007/s10278-026-02086-9",
+          "expected_rank": 1
+        },
+        {
+          "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
+          "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "top_1_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "expected_rank": 1
+        }
+      ]
+    },
+    "corrupted": {
+      "name": "papers-corrupted",
+      "documents": 24,
+      "smoke": [
+        {
+          "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
+          "expected_paper_id": "10.2118/234689-pa",
+          "top_1_paper_id": "10.20944/preprints202604.0339.v1",
+          "expected_rank": null
+        },
+        {
+          "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
+          "expected_paper_id": "10.1007/s10278-026-02086-9",
+          "top_1_paper_id": "10.70121/001c.158711",
+          "expected_rank": null
+        },
+        {
+          "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
+          "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "top_1_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "expected_rank": 1
+        }
+      ]
+    },
+    "repaired": {
+      "name": "papers-repaired",
+      "documents": 24,
+      "smoke": [
+        {
+          "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
+          "expected_paper_id": "10.2118/234689-pa",
+          "top_1_paper_id": "10.2118/234689-pa",
+          "expected_rank": 1
+        },
+        {
+          "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
+          "expected_paper_id": "10.1007/s10278-026-02086-9",
+          "top_1_paper_id": "10.1007/s10278-026-02086-9",
+          "expected_rank": 1
+        },
+        {
+          "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
+          "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "top_1_paper_id": "10.21203/rs.3.rs-10178277/v1",
+          "expected_rank": 1
+        }
+      ]
+    }
+  },
+  "test_set": {
+    "samples": 8,
+    "sha256": "a12649764805398145c1a89e1c84179b618c8bd72cc4129facd79ef52aa66aac",
+    "locked": true
+  },
+  "metrics": {
+    "baseline": {
+      "samples": 8,
+      "retrieval_hit_rate": 1.0,
+      "mean_token_f1": 1.0,
+      "judge_accuracy": 1.0,
+      "mean_judge_score": 5,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    },
+    "corrupted": {
+      "samples": 8,
+      "retrieval_hit_rate": 0.75,
+      "mean_token_f1": 0.7616279069767442,
+      "judge_accuracy": 0.75,
+      "mean_judge_score": 4,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    },
+    "repaired": {
+      "samples": 8,
+      "retrieval_hit_rate": 1.0,
+      "mean_token_f1": 1.0,
+      "judge_accuracy": 1.0,
+      "mean_judge_score": 5,
+      "ragas": {
+        "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+      }
+    }
+  },
+  "quality_freshness": {
+    "quality_passed": {
+      "baseline": true,
+      "corrupted": false,
+      "repaired": true
+    },
+    "is_fresh": {
+      "baseline": true,
+      "corrupted": false,
+      "repaired": true
+    },
+    "stale_rows": {
+      "baseline": 0,
+      "corrupted": 2,
+      "repaired": 0
+    }
+  },
+  "recovery_statement": "Quality and freshness recovered to baseline values. Aggregate locked-test-set metrics did not change across the three states, so no metric-recovery claim is made."
+}

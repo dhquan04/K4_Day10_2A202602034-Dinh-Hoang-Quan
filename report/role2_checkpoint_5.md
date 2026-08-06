@@ -12,7 +12,7 @@
 - **Raw Parsed Records (`data/raw/crossref_records.json`)**: `24 records` (100% Intact, Unmutated)
 
 ### 2. Corruption Lineage Tracing Helper
-- Implemented `trace_corrupted_lineage(paper_id: str, settings: Settings)` in [`src/ingestion/crossref.py`](file:///e:/lab1/K4_Day10_Nhom-ChickenFarmer/src/ingestion/crossref.py#L330-L375).
+- Implemented `trace_corrupted_lineage(paper_id: str, settings: Settings)` in `src/ingestion/crossref.py`.
 - Maps corrupted items in `papers_clean_corrupted.csv/json` directly back to the original raw `PaperRecord` entries in `data/raw/crossref_records.json`.
 
 ## ✅ Conclusion
