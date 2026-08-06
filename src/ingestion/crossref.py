@@ -243,6 +243,15 @@ def load_raw_records(path: Path) -> list[PaperRecord]:
     return records
 
 
+def restore_from_raw_snapshot(settings: Settings) -> list[PaperRecord]:
+    """Recovery Point Helper (CP4 / CP6): Load immutable raw records from snapshot to enable data repair."""
+    raw_path = settings.paths.raw_records_json
+    if not raw_path.exists():
+        raise FileNotFoundError(f"Raw snapshot file not found at {raw_path}. Unable to restore.")
+    return load_raw_records(raw_path)
+
+
+
 def inspect_raw_lineage(records: list[PaperRecord]) -> dict[str, Any]:
     """Inspect and audit raw record snapshot for CP1 lineage and handoff."""
     total = len(records)
