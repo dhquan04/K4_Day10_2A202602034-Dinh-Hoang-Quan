@@ -1,0 +1,38 @@
+{
+  "checkpoint": "CP3",
+  "role": "eval|observe",
+  "artifacts_present": {
+    "baseline_metrics": true,
+    "baseline_answers": true,
+    "baseline_quality": true,
+    "freshness": true,
+    "phase1_report": true,
+    "baseline_signals": true
+  },
+  "cross_check": {
+    "samples_match_answers": true,
+    "metrics_in_report": true,
+    "quality_passed": true,
+    "is_fresh": true
+  },
+  "hit_miss": {
+    "retrieval_hits": 8,
+    "retrieval_misses": 0,
+    "hit_example_id": "summary-01",
+    "answer_quality_gap_ids": [
+      "categories-07",
+      "categories-08"
+    ],
+    "note": "No retrieval miss; categories questions hit docs but empty categories_joined yields empty answer."
+  },
+  "metrics": {
+    "samples": 8,
+    "retrieval_hit_rate": 1.0,
+    "mean_token_f1": 0.75,
+    "judge_accuracy": 0.75,
+    "mean_judge_score": 4,
+    "ragas": {
+      "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+    }
+  }
+}

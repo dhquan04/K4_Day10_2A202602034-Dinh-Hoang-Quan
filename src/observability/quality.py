@@ -332,12 +332,13 @@ def freeze_baseline_signals(
     quality: dict[str, Any],
     freshness: dict[str, Any],
     embedding_audit: dict[str, Any] | None = None,
+    metrics: dict[str, Any] | None = None,
     output_name: str = "baseline_signals.json",
 ) -> dict[str, Any]:
-    """Freeze baseline quality/freshness signals for post-corruption comparison."""
+    """Freeze baseline quality/freshness/metrics signals for post-corruption comparison."""
     payload: dict[str, Any] = {
         "generated_at": now_utc().isoformat(),
-        "purpose": "Baseline signals frozen at CP2 for post-corruption comparison.",
+        "purpose": "Baseline signals/metrics frozen at CP3 for post-corruption comparison.",
         "quality": {
             "report_name": quality.get("report_name"),
             "passed": quality.get("passed"),
@@ -365,5 +366,14 @@ def freeze_baseline_signals(
     }
     if embedding_audit is not None:
         payload["embedding_audit"] = embedding_audit
+    if metrics is not None:
+        payload["metrics"] = {
+            "samples": metrics.get("samples"),
+            "retrieval_hit_rate": metrics.get("retrieval_hit_rate"),
+            "mean_token_f1": metrics.get("mean_token_f1"),
+            "judge_accuracy": metrics.get("judge_accuracy"),
+            "mean_judge_score": metrics.get("mean_judge_score"),
+            "ragas": metrics.get("ragas"),
+        }
     write_json(settings.paths.quality_dir / output_name, payload)
     return payload

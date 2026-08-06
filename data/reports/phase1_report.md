@@ -11,7 +11,7 @@
 | Filter | from-pub-date:2026-02-07,has-abstract:true |
 | Raw records | 24 |
 | Clean records | 24 |
-| Fetched at | 2026-08-06T08:07:11.096662+00:00 |
+| Fetched at | 2026-08-06T07:47:16.896756+00:00 |
 
 ## 2. Evaluation metrics
 
@@ -62,8 +62,10 @@ Overall quality passed: `True`
 - Metrics: `data/results/baseline_metrics.json`
 - Answers: `data/results/baseline_answers.json`
 
-## 6. Notes for CP3
+## 6. Baseline evaluation notes (CP3)
 
-- Điền metrics từ `evaluate_pipeline` (không hard-code).
-- Giải thích ít nhất một retrieval hit/miss bằng `baseline_answers.json`.
-- Đối chiếu quality/freshness với artifact JSON trong `data/quality/`.
+- Metrics lấy từ `data/results/baseline_metrics.json` (không hard-code).
+- Retrieval hit: 8/8 (`retrieval_hit_rate=1.0`); mọi `ground_truth_doc_ids` có trong clean + index.
+- Answer quality gap: `categories-07`/`categories-08` retrieval hit nhưng `answer=""` (metadata `categories_joined` rỗng) → `token_f1=0`, judge incorrect. GT dùng `primary_category=uncategorized`.
+- Judge hiện dùng fallback heuristic khi LLM evaluator unavailable.
+- Đối chiếu report ↔ quality/freshness/metrics JSON đã khớp trước khi đóng baseline.
