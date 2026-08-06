@@ -23,24 +23,44 @@ from retrieval.index import LocalEmbeddingIndex  # noqa: E402
 from retrieval.qa import answer_question  # noqa: E402
 
 
+SEMANTIC_SMOKE_CASES: tuple[dict[str, str], ...] = (
+    {
+        "query": "Which paper proposes a retrieval-augmented framework for oil and gas safety report generation?",
+        "expected_paper_id": "10.2118/234689-pa",
+    },
+    {
+        "query": "Which paper uses multimodal agentic retrieval for diagnostic support of jawbone lesions?",
+        "expected_paper_id": "10.1007/s10278-026-02086-9",
+    },
+    {
+        "query": "Which paper studies retrieval-augmented language models for cross-market equity time-series forecasting?",
+        "expected_paper_id": "10.21203/rs.3.rs-10178277/v1",
+    },
+)
+
+
 def _semantic_checks(
     index: LocalEmbeddingIndex,
     clean_rows: list[dict[str, Any]],
     top_k: int,
 ) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
-    for row in clean_rows[:3]:
-        query = row["title"]
+    clean_ids = {str(row["paper_id"]) for row in clean_rows}
+    for case in SEMANTIC_SMOKE_CASES:
+        query = case["query"]
+        expected_paper_id = case["expected_paper_id"]
+        if expected_paper_id not in clean_ids:
+            raise AssertionError(f"Semantic smoke-test source is absent from clean data: {expected_paper_id}")
         results = index.search(query, top_k=top_k)
         retrieved_ids = [result.paper_id for result in results]
-        if row["paper_id"] not in retrieved_ids:
+        if expected_paper_id not in retrieved_ids:
             raise AssertionError(
-                f"Semantic search missed {row['paper_id']} for its source title: {query}"
+                f"Semantic search missed {expected_paper_id} for query: {query}"
             )
         checks.append(
             {
                 "query": query,
-                "expected_paper_id": row["paper_id"],
+                "expected_paper_id": expected_paper_id,
                 "retrieved": [
                     {
                         "paper_id": result.paper_id,
