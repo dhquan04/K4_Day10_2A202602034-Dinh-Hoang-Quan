@@ -41,7 +41,10 @@ DEFAULT_DROP_LOG_NAME = "clean_drop_log.json"
 
 def _load_clean_dataframe(csv_path: Path, json_path: Path) -> pd.DataFrame:
     if csv_path.exists():
-        df = pd.read_csv(csv_path)
+        # keep_default_na=False: this contract writes "" (not NaN) for optional
+        # text columns, and pandas' default NA sniffing would turn them back
+        # into NaN on read, which is not what write_csv produced.
+        df = pd.read_csv(csv_path, keep_default_na=False, na_filter=False)
         for column in ("authors", "categories"):
             if column in df.columns:
                 df[column] = df[column].apply(_coerce_list_cell)
