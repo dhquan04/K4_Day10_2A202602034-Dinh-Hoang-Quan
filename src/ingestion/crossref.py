@@ -267,6 +267,56 @@ def inspect_raw_lineage(records: list[PaperRecord]) -> dict[str, Any]:
     }
 
 
+def trace_paper_lineage(paper_id: str, settings: Settings) -> dict[str, Any]:
+    """Trace a single paper_id across raw -> clean -> index stages for CP2 verification."""
+    target_id = paper_id.strip().lower()
+
+    # 1. Raw stage
+    raw_record = None
+    if settings.paths.raw_records_json.exists():
+        raw_list = read_json(settings.paths.raw_records_json)
+        for item in raw_list:
+            if str(item.get("paper_id", "")).strip().lower() == target_id:
+                raw_record = item
+                break
+
+    # 2. Clean stage
+    clean_record = None
+    if settings.paths.clean_json.exists():
+        clean_list = read_json(settings.paths.clean_json)
+        for item in clean_list:
+            if str(item.get("paper_id", "")).strip().lower() == target_id:
+                clean_record = item
+                break
+
+    # 3. Index stage
+    index_record = None
+    if settings.paths.embeddings_json.exists():
+        emb_manifest = read_json(settings.paths.embeddings_json)
+        docs = emb_manifest.get("documents", [])
+        for doc in docs:
+            if str(doc.get("paper_id", "")).strip().lower() == target_id:
+                index_record = doc
+                break
+
+    in_raw = raw_record is not None
+    in_clean = clean_record is not None
+    in_index = index_record is not None
+
+    return {
+        "paper_id": paper_id,
+        "in_raw": in_raw,
+        "in_clean": in_clean,
+        "in_index": in_index,
+        "lineage_intact": (in_raw and in_clean and in_index),
+        "raw_title": raw_record.get("title") if raw_record else None,
+        "clean_title": clean_record.get("title") if clean_record else None,
+        "index_title": index_record.get("title") if index_record else None,
+        "raw_authors": raw_record.get("authors") if raw_record else None,
+        "clean_authors": clean_record.get("authors") if clean_record else None,
+    }
+
+
 if __name__ == "__main__":
     import json
     s = load_settings()
@@ -276,8 +326,14 @@ if __name__ == "__main__":
         print(f"[OK] Loaded {len(recs)} raw records successfully.")
         print("[AUDIT] Lineage Summary:")
         print(json.dumps(audit, indent=2, ensure_ascii=True))
+        
+        sample_id = recs[0].paper_id
+        trace = trace_paper_lineage(sample_id, s)
+        print(f"\n[TRACE] Single Paper Lineage ({sample_id}):")
+        print(json.dumps(trace, indent=2, ensure_ascii=True))
     else:
         print("[WARN] raw_records_json does not exist. Run fetch_source_records(settings) first.")
+
 
 
 
