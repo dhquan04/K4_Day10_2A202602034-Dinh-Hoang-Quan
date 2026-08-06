@@ -3,7 +3,7 @@
 **Nhóm:** ChickenFarmer  
 **Vai trò:** Evaluation & observability owner (`eval|observe`)  
 **Phạm vi:** `src/evaluation/testset.py`, `src/observability/quality.py`, `data/eval/`, `data/quality/`  
-**Checkpoint:** CP0, CP1, CP2 và CP3
+**Checkpoint:** CP0–CP4
 
 ## Checkpoint 0 — Contract evaluation & observability
 
@@ -188,3 +188,43 @@ Không sửa: `phase1.py`, `corruption_flow.py`, `retrieval/*`, `cleaning.py`, `
 ### Ngoài phạm vi Role 5 ở CP3
 
 Không sửa: `phase1.py`, `qa.py`, `retrieval/*`, `corruption_*`.
+
+## Checkpoint 4 — Khóa test set & dự báo signal
+
+CP4 là checkpoint nghỉ. Role 5 (`eval|observe`) chỉ cần: **khóa test set** và **dự báo** quality/freshness sẽ đổi sau corruption (CP5).
+
+### Việc đã làm
+
+| Việc | Artifact |
+| --- | --- |
+| Khôi phục + khóa test set (file `data/eval/` từng thiếu) | `data/eval/test_set.json` từ đúng CP3 `baseline_answers.json` |
+| Lock metadata (SHA256, rules, GT IDs) | `data/quality/test_set_lock.json` |
+| Dự báo signal theo 6 corruption types | `data/quality/cp4_signal_forecast.json` |
+
+### Quy tắc khóa test set
+
+- Không `REFRESH_TEST_SET=true` khi chạy corrupted/repaired.
+- Giữ nguyên evaluator, `top_k`, ground truth.
+- SHA256 hiện tại: xem `test_set_lock.json`.
+
+### Dự báo ngắn (sau full corruption)
+
+| Signal | Kỳ vọng |
+| --- | --- |
+| `quality.passed` | `false` |
+| Fail chắc | `summary_not_null`, `summary_min_length`, `paper_id_unique` |
+| `freshness.is_fresh` | `false` (`stale_date` +400 ngày > threshold 180) |
+| Có thể không đổi | `paper_id_not_null`, `title_not_null`, `age_days_present` |
+| Metric | Có thể giảm do noise/truncate/blank; drop_latest **không** trùng GT của test set hiện tại |
+
+### Phụ thuộc role khác
+
+| Role | Cần gì | Trạng thái |
+| --- | --- | --- |
+| Lead/CP3 | baseline metrics/answers/signals | Có |
+| Cleaning | `corruption.py` để dự báo đúng loại lỗi | Có (đã đọc, không sửa) |
+| Eval file | `data/eval/test_set.json` | **Thiếu trước CP4** → Role 5 đã restore từ baseline answers |
+
+### Ngoài phạm vi Role 5 ở CP4
+
+Không implement corruption flow, không sửa `corruption.py` / `phase1.py` / retrieval.
