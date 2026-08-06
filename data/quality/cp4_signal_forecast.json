@@ -1,0 +1,108 @@
+{
+  "generated_at": "2026-08-06T10:19:44.085358+00:00",
+  "checkpoint": "CP4",
+  "role": "eval|observe",
+  "purpose": "Forecast quality/freshness signal changes after CP5 corruption; compare against baseline_signals.json.",
+  "baseline_reference": {
+    "signals": "data/quality/baseline_signals.json",
+    "metrics": "data/results/baseline_metrics.json",
+    "row_count": 24,
+    "quality_passed": true,
+    "is_fresh": true,
+    "stale_rows": 0,
+    "retrieval_hit_rate": 1.0,
+    "mean_token_f1": 0.75,
+    "judge_accuracy": 0.75
+  },
+  "corruption_source": "src/ingestion/corruption.py",
+  "forecast": [
+    {
+      "corruption": "drop_latest",
+      "count": 2,
+      "quality_signals_expected_to_change": [
+        "row_count"
+      ],
+      "freshness_signals_expected_to_change": [
+        "latest_published",
+        "mean_age_days",
+        "total_rows"
+      ],
+      "expected_direction": "row_count decreases by 2 before other mutations; latest_published becomes older than baseline 2026-08-05",
+      "likely_metric_impact": "Low for current locked test set: drop candidates do not overlap locked ground_truth_doc_ids"
+    },
+    {
+      "corruption": "blank_summary",
+      "count": 2,
+      "quality_signals_expected_to_change": [
+        "summary_not_null",
+        "summary_min_length",
+        "quality.passed"
+      ],
+      "freshness_signals_expected_to_change": [],
+      "expected_direction": "summary_not_null and summary_min_length flip to fail; overall quality.passed -> false",
+      "likely_metric_impact": "If a blanked paper is retrieved for summary questions, token_f1/judge drop"
+    },
+    {
+      "corruption": "noise_summary",
+      "count": 2,
+      "quality_signals_expected_to_change": [],
+      "freshness_signals_expected_to_change": [],
+      "expected_direction": "Basic null/length checks may still pass; embedding text becomes noisy",
+      "likely_metric_impact": "Possible retrieval/answer degradation without failing quality gates"
+    },
+    {
+      "corruption": "truncate_title",
+      "count": 2,
+      "quality_signals_expected_to_change": [],
+      "freshness_signals_expected_to_change": [],
+      "expected_direction": "title remains non-empty so title_not_null still passes",
+      "likely_metric_impact": "Exact title lookup in qa.py may miss; retrieval_hit_rate / token_f1 can fall for title-based questions"
+    },
+    {
+      "corruption": "stale_date",
+      "count": 2,
+      "quality_signals_expected_to_change": [
+        "age_days_non_negative"
+      ],
+      "freshness_signals_expected_to_change": [
+        "stale_rows",
+        "is_fresh",
+        "max_age_days",
+        "mean_age_days",
+        "oldest_published"
+      ],
+      "expected_direction": "shift_days=400 > freshness_threshold_days=180 => stale_rows >= 2, is_fresh -> false, max_age_days rises",
+      "likely_metric_impact": "Mostly observability signal; answer metrics change only if date questions depend on corrupted published metadata"
+    },
+    {
+      "corruption": "duplicate_rows",
+      "count": 2,
+      "quality_signals_expected_to_change": [
+        "paper_id_unique",
+        "row_count",
+        "quality.passed"
+      ],
+      "freshness_signals_expected_to_change": [
+        "total_rows"
+      ],
+      "expected_direction": "paper_id_unique fails; row_count increases by 2 relative to post-drop frame",
+      "likely_metric_impact": "Index/doc counts inflate; uniqueness audit fails"
+    }
+  ],
+  "summary_expectation_after_full_corruption": {
+    "quality.passed": false,
+    "checks_likely_fail": [
+      "summary_not_null",
+      "summary_min_length",
+      "paper_id_unique"
+    ],
+    "freshness.is_fresh": false,
+    "freshness.stale_rows": ">= 2",
+    "signals_that_may_not_change": [
+      "paper_id_not_null",
+      "title_not_null",
+      "age_days_present"
+    ],
+    "evaluation_rule": "Reuse locked test_set.json only; do not set REFRESH_TEST_SET=true"
+  }
+}
