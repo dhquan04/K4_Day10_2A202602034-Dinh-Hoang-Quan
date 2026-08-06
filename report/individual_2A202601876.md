@@ -18,12 +18,25 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
-| Clean contract | cleaning pipeline | raw records | clean CSV/JSON | Hoàn thành |
-| Controlled corruption | `corrupt_clean_dataframe()` | baseline DataFrame/config | corrupted data + log | Hoàn thành |
-| Repaired clean | `build_clean_dataframe()` | raw snapshot | repaired CSV/JSON | Hoàn thành |
-| Schema validation | `script/validate_clean.py` | repaired artifacts | PASS result | Hoàn thành |
+| Clean contract | `src/ingestion/cleaning.py:build_clean_dataframe()` | raw records | `data/clean/papers_clean.{csv,json}` | Hoàn thành |
+| Controlled corruption | `src/ingestion/corruption.py:corrupt_clean_dataframe()` | baseline DataFrame/config | corrupted data + `data/results/corruption_log.json` | Hoàn thành |
+| Repaired clean | `cleaning.py:build_clean_dataframe()` | raw snapshot | `data/clean/papers_clean_repaired.{csv,json}` | Hoàn thành |
+| Schema validation | `script/validate_clean.py` | repaired CSV/JSON | strict validation PASS | Hoàn thành |
 
 Tôi sở hữu clean data và corruption/repair artifact, không tự thay đổi collection hoặc evaluation metric.
+
+### Nhiệm vụ theo checkpoint CP1–CP6
+
+| Checkpoint | Nhiệm vụ thực hiện | Kết quả/bằng chứng |
+|---|---|---|
+| CP1 | Chốt clean-data contract và derived fields dùng downstream. | Schema clean, `text_for_embedding`. |
+| CP2 | Kiểm tra clean artifact đáp ứng input index/evaluate. | `data/clean/papers_clean.{csv,json}` hợp lệ. |
+| CP3 | Hỗ trợ baseline run; giữ clean contract không đổi. | Baseline clean 24 rows. |
+| CP4 | Chọn corruption có chủ đích, record và tham số theo seed. | Scenario plan/seed 42. |
+| CP5 | Tạo `corrupt_clean_dataframe`, log ID/type/params/count và xác minh corrupted dataset. | `corruption_log.json`, corrupted artifacts. |
+| CP6 | Chạy cleaning lại từ raw, không sửa tay; kiểm tra schema/count/quality và demo ba state. | Repaired artifacts, `validate_clean.py` PASS. |
+
+Chi tiết thực hiện: CP1 xác định cột bắt buộc, normalisation và derived fields (`summary_chars`, `age_days`, `text_for_embedding`); CP2 tạo/kiểm tra clean CSV/JSON cho downstream; CP3 xác nhận baseline clean 24 rows trước khi freeze. CP4 chọn sáu loại corruption, record và severity có chủ đích. CP5 triển khai từng mutation bằng seed 42, log ID/type/parameters/before-after count và kiểm tra artifact phản ánh đúng log. CP6 không vá dữ liệu lỗi: build lại từ raw, chạy strict schema/uniqueness/content validation, bàn giao repaired artifacts để index/evaluation và demo clean–corrupted–repaired.
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
@@ -37,9 +50,9 @@ Tôi sở hữu clean data và corruption/repair artifact, không tự thay đ�
 
 | Nhiệm vụ | File/hàm/artifact | Kết quả bàn giao | Cách xác minh |
 |---|---|---|---|
-| Tạo corruption | `corruption_log.json` | 12 deterministic events, seed 42 | log ID/type/parameters |
-| Lưu state riêng | `papers_clean_corrupted.*` | baseline không bị overwrite | artifact paths khác nhau |
-| Repair | `papers_clean_repaired.*` | 24 rows strict-clean | `validate_clean.py` PASS |
+| Tạo corruption | `data/results/corruption_log.json` | 12 deterministic events, seed 42 | log ID/type/parameters |
+| Lưu state riêng | `data/clean/papers_clean_corrupted.{csv,json}` | baseline không bị overwrite | artifact paths khác nhau |
+| Repair | `data/clean/papers_clean_repaired.{csv,json}` | 24 rows strict-clean | `script/validate_clean.py` PASS |
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -68,7 +81,11 @@ Có 12 events, hai cho mỗi loại. Hai drop và hai duplicate giữ corrupted 
 
 ## 9. Điều học được và hướng cải thiện
 
-Corruption cần state-specific contract, seed và log. Có thể thêm severity levels, corruption author/DOI/ngôn ngữ và property-based tests cho derived fields.
+Tôi học được rằng “corruption có chủ đích” phải được thiết kế như một thí nghiệm: có seed, population mục tiêu, tham số, before/after count và artifact độc lập. Nếu chỉ sửa dữ liệu ngẫu nhiên hoặc không log, không thể tái lập lỗi và không thể nối impact về nguyên nhân cụ thể. Derived fields cũng là một phần của data contract; nếu chúng không được rebuild đúng, quality signal sẽ phản ánh lỗi của pipeline thay vì lỗi dữ liệu cần đo.
+
+Một bài học khác là count không đủ để khẳng định dữ liệu tốt: hai records bị drop có thể được bù bằng hai duplicate rows, tổng vẫn là 24. Vì vậy validation phải kiểm tra uniqueness, null/length, date và embedding text, còn repair đúng nghĩa là chạy lại cleaning từ raw chứ không vá từng hàng corrupted.
+
+Hướng cải thiện: thêm corruption cho author/DOI/category/ngôn ngữ; dùng severity levels để vẽ đường cong quality–retrieval; thêm property-based tests cho `summary_chars`, `age_days`, `text_for_embedding`; và lưu profile before/after theo từng cột. Thành công là mỗi event đều tái lập bằng seed, vi phạm signal dự kiến và repaired artifact quay lại strict contract.
 
 ## 10. Cam kết của thành viên
 

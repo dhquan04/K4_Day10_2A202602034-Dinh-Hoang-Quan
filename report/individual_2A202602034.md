@@ -18,12 +18,25 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
-| Baseline gate | `report/cp4_member1_baseline_checklist.md` | raw/clean/test/metrics baseline | checklist, hash, blocker | Hoàn thành |
-| Corruption–repair orchestration | `src/pipelines/corruption_flow.py` | clean/raw/test set | artifact corrupted và repaired | Hoàn thành |
-| Comparison report | `src/observability/reporting.py` | metrics, signals, corruption log | `data/reports/corruption_report.md` | Hoàn thành |
-| Final review/demo | `script/run_cp6_review.py` | artifacts ba trạng thái | CP6 review và demo | Hoàn thành |
+| Baseline gate | `report/cp4_member1_baseline_checklist.md` | raw/clean/test lock/metrics baseline | checklist, hash, blocker | Hoàn thành |
+| Corruption–repair orchestration | `src/pipelines/corruption_flow.py` | clean/raw/test lock | corrupted/repaired artifacts theo state | Hoàn thành |
+| Comparison report | `src/observability/reporting.py:generate_corruption_report()` | metrics, signals, corruption log | `data/reports/corruption_report.md` | Hoàn thành |
+| Final review/demo | `script/run_cp6_review.py` | artifacts ba trạng thái | `data/results/cp6_final_review.json`, `data/reports/cp6_demo.md` | Hoàn thành |
 
 Phạm vi của tôi là điều phối contract và handoff giữa raw, clean, retrieval, evaluation và observability; không nhận thay đổi raw source hoặc tự sửa tay dữ liệu repaired.
+
+### Nhiệm vụ theo checkpoint CP1–CP6
+
+| Checkpoint | Nhiệm vụ thực hiện | Kết quả/bằng chứng |
+|---|---|---|
+| CP1 | Điều phối chốt contract raw/clean và điều kiện bàn giao pipeline. | Handoff schema và phạm vi ownership rõ ràng. |
+| CP2 | Rà dependency giữa clean data, index và evaluation; kiểm tra I/O handoff. | Pipeline baseline có các handoff xác định. |
+| CP3 | Kiểm tra baseline run, metrics, manifest và artifact trước phase corruption. | Baseline metrics/manifest được dùng làm mốc comparison. |
+| CP4 | Ghi baseline checklist, khóa hash và các blocker còn lại. | `report/cp4_member1_baseline_checklist.md`. |
+| CP5 | Hoàn thiện flow corrupt → rebuild → evaluate → signals → repair → compare. | `corruption_flow.py`, corruption report. |
+| CP6 | Freeze scope, review artifacts/no secret/no hard-code path, chỉ công bố recovery khi có số liệu. | `cp6_final_review.json`, `cp6_demo.md`. |
+
+Chi tiết thực hiện: CP1 chốt các contract/handoff raw → clean → index → evaluation; CP2 rà input/output của từng handoff và điều kiện pipeline có thể tái chạy; CP3 kiểm tra baseline raw/clean/index/metrics trước khi cho chuyển phase. Tại CP4 tôi lập checklist gồm raw/clean/test lock/manifest/metrics, ghi fingerprint và blocker. CP5 tôi điều phối toàn bộ flow có guard không ghi đè baseline, gọi corruption, build index state riêng, evaluation, quality/freshness, repair từ raw và report so sánh. CP6 tôi chạy review tự động kiểm tra artifacts, collection separation, lineage/schema, portable path và secret scan, sau đó freeze scope và chuẩn bị demo.
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
@@ -37,9 +50,9 @@ Phạm vi của tôi là điều phối contract và handoff giữa raw, clean, 
 
 | Nhiệm vụ | File/hàm/artifact | Kết quả bàn giao | Cách xác minh |
 |---|---|---|---|
-| Khóa baseline | CP4 checklist | fingerprint và artifacts bắt buộc | baseline không thay đổi |
-| Chạy full flow | `corruption_flow.py` | corrupt → index → evaluate → repair → compare | run flow thành công |
-| Final review | `cp6_final_review.json` | PASS, 3 collection tách biệt | `run_cp6_review.py` |
+| Khóa baseline | `report/cp4_member1_baseline_checklist.md` | fingerprint và artifacts bắt buộc | baseline không thay đổi |
+| Chạy full flow | `src/pipelines/corruption_flow.py` | corrupt → index → evaluate → repair → compare | `script/run_corruption_flow.py` PASS |
+| Final review | `data/results/cp6_final_review.json` | PASS, 3 collection tách biệt | `script/run_cp6_review.py` PASS |
 
 Output gồm corrupted/repaired clean, embeddings, answers, metrics, quality/freshness và report; baseline luôn giữ path/manifest riêng.
 
@@ -70,7 +83,11 @@ Raw snapshot → cleaning baseline → index/retrieval → frozen evaluation →
 
 ## 9. Điều học được và hướng cải thiện
 
-Baseline cần immutable để comparison đáng tin cậy. Có thể mở rộng test matrix theo corruption × trường dữ liệu, chạy nhiều seed và thêm regression gate trong CI.
+Tôi học được rằng điều phối pipeline không chỉ là gọi các script theo đúng thứ tự. Điều quan trọng là biến mỗi handoff thành contract có thể kiểm tra: input có schema/path rõ ràng, output có manifest/hash/log, và baseline được xem như dữ liệu chỉ-đọc. Khi có corruption, pipeline có thể chạy xong nhưng chưa đủ để kết luận recovery; cần đồng thời thấy raw lineage, repaired schema, collection isolation, quality/freshness và evaluation metrics phục hồi.
+
+Tôi cũng học được cách xử lý blocker liên vai trò: strict validation đúng cho clean data nhưng cần một ngoại lệ có phạm vi hẹp cho corruption experiment. Cờ cho phép intentional corruption chỉ có ý nghĩa khi không làm yếu contract baseline/repaired và có log để truy nguyên.
+
+Hướng cải thiện là (1) đưa baseline fingerprint, test-lock assertion và comparison threshold vào CI; (2) chạy nhiều seed/mức severity để tránh kết luận từ một corruption configuration; (3) mở rộng test matrix theo corruption × field × query type; và (4) thêm dashboard tự động biểu diễn chuỗi `event → quality/freshness signal → retrieval/answer delta`. Thành công được đo bằng regression job tự chặn baseline mutation và report tái tạo cùng kết quả từ artifact đã persist.
 
 ## 10. Cam kết của thành viên
 

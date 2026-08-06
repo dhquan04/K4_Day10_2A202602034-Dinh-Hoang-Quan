@@ -18,12 +18,25 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
-| Source/lineage contract | `trace_paper_lineage()` | raw, clean, manifest | raw → clean → index proof | Hoàn thành |
-| Raw recovery point | `restore_from_raw_snapshot()` | raw snapshot | repaired source input | Hoàn thành |
-| Corruption lineage | `trace_corrupted_lineage()` | log, corrupted/repaired clean | affected/recovered ID proof | Hoàn thành |
-| CP6 source review | `cp6_final_review.json` | raw/repaired artifacts | hash và field comparison | Hoàn thành |
+| Source/lineage contract | `src/ingestion/crossref.py:trace_paper_lineage()` | raw, clean, manifest | raw → clean → index proof | Hoàn thành |
+| Raw recovery point | `crossref.py:restore_from_raw_snapshot()` | raw snapshot | repaired source input | Hoàn thành |
+| Corruption lineage | `crossref.py:trace_corrupted_lineage()` | log, corrupted/repaired clean | affected/recovered ID proof | Hoàn thành |
+| CP6 source review | `data/results/cp6_final_review.json` | raw/repaired artifacts | hash và field comparison | Hoàn thành |
 
 Tôi sở hữu tính nguyên vẹn nguồn và traceability, không fetch dữ liệu mới trong CP5/CP6 để tránh làm lệch experiment.
+
+### Nhiệm vụ theo checkpoint CP1–CP6
+
+| Checkpoint | Nhiệm vụ thực hiện | Kết quả/bằng chứng |
+|---|---|---|
+| CP1 | Xác nhận source contract, raw schema và identity ban đầu của paper. | Raw `PaperRecord`/`paper_id` dùng nhất quán. |
+| CP2 | Kiểm tra lineage raw → clean → index và raw/clean count. | `report/role2_checkpoint_3.md`. |
+| CP3 | Đối chiếu raw snapshot, khóa nguyên tắc không fetch source mới. | Raw snapshot 24 records làm baseline source. |
+| CP4 | Giữ raw source làm recovery point và chuẩn bị trace record có lineage. | Snapshot/hash raw. |
+| CP5 | Xác nhận raw không mutate; trace record corrupted/drop về đúng raw record. | Role 2 checkpoint/lineage evidence. |
+| CP6 | Reload raw snapshot; chứng minh record bị corrupt/drop được khôi phục và kiểm tra secret. | CP6 review: 12/12 affected IDs recovered. |
+
+Chi tiết thực hiện: CP1 kiểm tra các trường nguồn, DOI/paper ID và quy tắc parse raw; CP2 đối chiếu ID/count giữa raw, clean và manifest để chứng minh provenance; CP3 giữ raw snapshot cố định sau baseline. CP4 chuẩn bị raw recovery point và chọn record có lineage rõ ràng. CP5 không fetch mới, đối chiếu corruption log với raw source, xác nhận raw không bị mutate. CP6 reload đúng snapshot, kiểm tra từng affected ID (kể cả drop) xuất hiện lại trong repaired dataset, đối chiếu core fields với baseline và cùng nhóm kiểm tra repository không lộ API key.
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
@@ -37,9 +50,9 @@ Tôi sở hữu tính nguyên vẹn nguồn và traceability, không fetch dữ 
 
 | Nhiệm vụ | File/hàm/artifact | Kết quả bàn giao | Cách xác minh |
 |---|---|---|---|
-| Khóa snapshot | raw artifacts/hash | 24 raw records bất biến | CP6 raw hash |
-| Trace corruption | role2 checkpoint evidence | mọi event có raw ancestor | log/lineage trace |
-| Chứng minh repair | CP6 review | 12/12 affected IDs recovered | core fields khớp baseline |
+| Khóa snapshot | `data/raw/` và CP6 hash | 24 raw records bất biến | `cp6_final_review.json` |
+| Trace corruption | `report/role2_checkpoint_5.md` | mọi event có raw ancestor | log/lineage trace |
+| Chứng minh repair | `data/results/cp6_final_review.json` | 12/12 affected IDs recovered | core fields khớp baseline |
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -68,7 +81,11 @@ Raw là provenance root; cleaning sinh clean artifact; retrieval chỉ index cle
 
 ## 9. Điều học được và hướng cải thiện
 
-Lineage phải là contract dữ liệu thay vì ghi chú thủ công. Có thể lưu version/timestamp/hash ở mọi handoff và tự động test raw ancestor/repaired equivalent cho từng event.
+Tôi học được rằng lineage không phải phần mô tả bổ sung ở cuối dự án mà là điều kiện để kết luận nguyên nhân. Nếu không giữ một raw snapshot bất biến, mọi thay đổi từ source bên ngoài có thể bị nhầm với tác động của corruption hoặc hiệu quả repair. Identity ổn định theo `paper_id`/DOI cũng quan trọng hơn count: count có thể bằng nhau trong corrupted state nhưng record cụ thể đã thay đổi.
+
+Khi phối hợp end-to-end, raw cần bàn giao không chỉ file mà còn contract về schema, origin, thời điểm và hash. Nhờ đó cleaning có thể rebuild, retrieval có identity nhất quán, còn evaluation có thể chứng minh ground truth đã quay lại. Tôi cũng nhận ra “không fetch mới” là một quyết định thực nghiệm để bảo toàn khả năng tái lập, không đơn thuần là tối ưu chi phí.
+
+Hướng cải thiện là lưu version/timestamp/hash cho mọi artifact raw và clean, tự động kiểm tra mỗi corruption event có raw ancestor và repaired equivalent, và bổ sung lineage graph có thể truy vấn. Khi corpus lớn hơn, nên dùng object storage versioning hoặc data catalog thay cho snapshot file đơn; tiêu chí thành công là tái tạo repaired state đúng hash mà không cần gọi lại nguồn ngoài.
 
 ## 10. Cam kết của thành viên
 

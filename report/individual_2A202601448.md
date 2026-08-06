@@ -18,12 +18,25 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
-| Baseline index | `LocalEmbeddingIndex` | clean baseline | `papers-baseline`, manifest | Hoàn thành |
-| Corrupted index | index build | corrupted clean | `papers-corrupted`, manifest | Hoàn thành |
-| Repaired index | index build | repaired clean | `papers-repaired`, manifest | Hoàn thành |
-| Retrieval validation | `verify_role4_cp5.py` | manifests/frozen queries | verification JSON | Hoàn thành |
+| Baseline index | `src/retrieval/index.py:LocalEmbeddingIndex` | `papers_clean.{csv,json}` | `papers-baseline`, `papers_embeddings.json` | Hoàn thành |
+| Corrupted index | `LocalEmbeddingIndex.build()` | corrupted clean | `papers-corrupted`, `papers_embeddings_corrupted.json` | Hoàn thành |
+| Repaired index | `LocalEmbeddingIndex.build()` | repaired clean | `papers-repaired`, `papers_embeddings_repaired.json` | Hoàn thành |
+| Retrieval validation | `script/verify_role4_cp5.py` | manifests/frozen queries | `data/results/role4_cp5_verification.json` | Hoàn thành |
 
 Tôi sở hữu retrieval/index contract và tính tách biệt collection; evaluation chỉ dùng index state được bàn giao.
+
+### Nhiệm vụ theo checkpoint CP1–CP6
+
+| Checkpoint | Nhiệm vụ thực hiện | Kết quả/bằng chứng |
+|---|---|---|
+| CP1 | Kiểm tra clean schema và chuẩn bị retrieval/index contract. | Identity, metadata và embedding input được chốt. |
+| CP2 | Build `papers-baseline`, manifest và smoke test retrieval. | `papers_embeddings.json`, collection 24 docs. |
+| CP3 | Xác minh exact lookup, semantic retrieval và agent grounding baseline. | `data/results/role4_cp3_verification.json`. |
+| CP4 | Khóa collection baseline và frozen comparison queries. | Baseline không bị mutate. |
+| CP5 | Tạo `papers-corrupted`, chạy lại baseline query và xác minh index baseline tách biệt. | `role4_cp5_verification.json`. |
+| CP6 | Tạo `papers-repaired`, smoke test agent/tool/retrieval và demo ba collection/path. | CP6 review/demo PASS. |
+
+Chi tiết thực hiện: CP1 đọc contract về `paper_id`, metadata và `text_for_embedding`; CP2 build collection/manifest baseline và kiểm tra semantic search; CP3 xác minh exact DOI/title lookup, semantic retrieval và agent tool grounding. CP4 khóa manifest baseline và frozen queries dùng để so sánh. CP5 tạo `papers-corrupted` tách biệt, cho phép intentional dirty input chỉ tại nhánh này, chạy lại query baseline và đối chiếu fingerprint. CP6 build `papers-repaired`, chạy smoke retrieval/agent trên ba path riêng, đối chiếu expected rank với baseline và bàn giao evidence cho review/demo.
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
@@ -37,9 +50,9 @@ Tôi sở hữu retrieval/index contract và tính tách biệt collection; eval
 
 | Nhiệm vụ | File/hàm/artifact | Kết quả bàn giao | Cách xác minh |
 |---|---|---|---|
-| Tạo ba collection | embedding manifests | collection/path riêng, 24 docs/state | CP6 review |
-| Bảo vệ baseline | role4 verification | fingerprint không đổi | `verify_role4_cp5.py` |
-| Smoke retrieval | CP6 demo/review | 3 frozen queries chạy theo state | ranks được đối chiếu |
+| Tạo ba collection | `data/embeddings/papers_embeddings*.json` | collection/path riêng, 24 docs/state | `cp6_final_review.json` |
+| Bảo vệ baseline | `data/results/role4_cp5_verification.json` | fingerprint không đổi | `script/verify_role4_cp5.py` |
+| Smoke retrieval | `data/reports/cp6_demo.md` | 3 frozen queries chạy theo state | expected ranks được đối chiếu |
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -68,7 +81,11 @@ Clean artifact → embeddings/index manifest → semantic search/exact lookup �
 
 ## 9. Điều học được và hướng cải thiện
 
-Collection namespace và manifest là ranh giới experiment quan trọng. Nên bổ sung versioned collection names, assertion chống trộn manifest, cùng ranking metrics MRR/nDCG/Recall@k.
+Tôi học được rằng vector index không chỉ là nơi lưu embedding; collection name, manifest và record identity là ranh giới tái lập của experiment. Dùng chung một collection cho baseline/corrupted/repaired có thể trả kết quả tưởng đúng nhưng không biết vector nào đang được query. Manifest tách biệt giúp biết chính xác clean state, embedding artifact và collection nào tạo ra một metric.
+
+Tôi cũng học được cần phân tích semantic retrieval và exact lookup riêng. Một câu chứa DOI có thể vẫn trả lời đúng nhờ lookup dù semantic content bị noise; vì vậy chỉ xem answer score sẽ không đủ, cần xem retrieved IDs/ranks và query type. Ngoại lệ index cho intentional corruption cũng phải được khoanh vùng để không biến validation strict thành hình thức.
+
+Hướng cải thiện: dùng versioned collection names và assertion manifest–collection trước query; ghi retrieval trace gồm query, IDs, distances và state; đánh giá Recall@k, MRR, nDCG, latency trên tập query không lộ DOI/exact title. Cải thiện đạt yêu cầu khi ranking metrics và trace chỉ rõ degradation/recovery, đồng thời không có cross-state contamination.
 
 ## 10. Cam kết của thành viên
 

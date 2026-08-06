@@ -18,12 +18,25 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
-| Frozen test set | `test_set.json`, `test_set_lock.json` | questions/ground truths | 8 samples + SHA-256 lock | Hoàn thành |
-| Evaluation | `evaluate_pipeline()` | index state + frozen set | answers/metrics JSON | Hoàn thành |
-| Observability | quality/freshness modules | clean state + log | quality/freshness JSON | Hoàn thành |
-| Comparison | `generate_corruption_report()` | metrics/signals/log | corruption report | Hoàn thành |
+| Frozen test set | `data/eval/test_set.json`, `data/quality/test_set_lock.json` | questions/ground-truth DOI | 8 samples + SHA-256 lock | Hoàn thành |
+| Evaluation | `src/evaluation/metrics.py:evaluate_pipeline()` | manifest/index state + frozen set | `data/results/{baseline,corrupted,repaired}_{answers,metrics}.json` | Hoàn thành |
+| Observability | `src/observability/quality.py` | clean state + corruption log | `data/quality/*_{quality,freshness}.json` | Hoàn thành |
+| Comparison | `src/observability/reporting.py:generate_corruption_report()` | metrics/signals/log | `data/reports/corruption_report.md` | Hoàn thành |
 
 Tôi sở hữu evidence đánh giá và observability; không thay đổi raw, clean hoặc index ngoài việc đọc artifact đã bàn giao.
+
+### Nhiệm vụ theo checkpoint CP1–CP6
+
+| Checkpoint | Nhiệm vụ thực hiện | Kết quả/bằng chứng |
+|---|---|---|
+| CP1 | Chuẩn bị rule quality/freshness và draft câu hỏi có `ground_truth_doc_ids`. | Contract đánh giá đầu vào/đầu ra. |
+| CP2 | Khóa 8 câu test set, audit baseline manifest và format evidence. | `data/quality/test_set_lock.json`. |
+| CP3 | Xác minh answers, metrics, quality và freshness của baseline. | `baseline_{answers,metrics}.json`, `baseline_quality.json`, `freshness_report.json`. |
+| CP4 | Khóa fingerprint test set và dự báo signal khi corruption. | `test_set_lock.json`. |
+| CP5 | Evaluate corrupted bằng test set cũ; nối log → signal → metric khi có evidence. | `corrupted_{answers,metrics}.json`, quality/freshness, report. |
+| CP6 | Evaluate repaired, tính delta ba state và review report. | `repaired_{answers,metrics}.json`, `cp6_final_review.json`. |
+
+Chi tiết thực hiện: CP1 xác định rule quality/freshness và draft câu hỏi/ground truth; CP2 khóa test set, kiểm tra manifest baseline và chuẩn bị format evidence; CP3 chạy baseline answers/metrics/signals làm mốc. CP4 lưu test-set fingerprint và dự báo duplicate/blank summary sẽ làm quality fail, stale date sẽ làm freshness fail. CP5 đánh giá corrupted bằng đúng test set cũ, sinh answers/metrics/quality/freshness và chỉ liên kết event → signal → metric khi log hỗ trợ. CP6 đánh giá repaired, tính toàn bộ delta baseline–corrupted–repaired, kiểm tra JSON/report đồng nhất và ghi rõ recovery/giới hạn dựa trên dữ liệu thật.
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
@@ -37,9 +50,9 @@ Tôi sở hữu evidence đánh giá và observability; không thay đổi raw, 
 
 | Nhiệm vụ | File/hàm/artifact | Kết quả bàn giao | Cách xác minh |
 |---|---|---|---|
-| Khóa test set | `test_set_lock.json` | 8 samples, hash cố định | lock assertion PASS |
-| Evaluate ba state | answers/metrics JSON | cùng câu hỏi cho 3 state | đủ 8 answers/state |
-| Report causal evidence | `corruption_report.md` | event → signal → metric | đối chiếu log/JSON |
+| Khóa test set | `data/quality/test_set_lock.json` | 8 samples, SHA-256 cố định | lock assertion PASS |
+| Evaluate ba state | `data/results/*_{answers,metrics}.json` | cùng 8 câu cho 3 state | 8 answers/state, metric JSON hợp lệ |
+| Report causal evidence | `data/reports/corruption_report.md` | event → signal → metric | đối chiếu `corruption_log.json` và signal/metric JSON |
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -79,7 +92,11 @@ Hai drop events giải thích hit rate/judge giảm tại hai câu hỏi tương
 
 ## 9. Điều học được và hướng cải thiện
 
-Metric chỉ có ý nghĩa khi test set phủ failure mode. Có thể tăng số samples, thêm MRR/nDCG/Recall@k, chạy nhiều seed, dùng judge độc lập/RAGAS và báo confidence interval.
+Tôi học được rằng frozen test set bảo đảm tính công bằng nhưng chưa tự động bảo đảm độ nhạy. Nếu test set không chứa câu hỏi liên quan record bị drop hoặc trường bị corrupt, metric có thể không đổi dù dữ liệu đã xấu. Vì vậy cần thiết kế câu hỏi theo failure mode và vẫn giữ cùng một tập đó cho ba trạng thái, thay vì thay câu hỏi để làm kết quả đẹp hơn.
+
+Tôi cũng học được không nên suy diễn quality từ một metric duy nhất. Hit rate/judge score cho thấy ảnh hưởng tới retrieval/answer; quality checks giải thích duplicate/blank summary; freshness giải thích stale date; corruption log nối các quan sát này về nguyên nhân. Kết luận recovery chỉ đáng tin khi answers, metrics, signals và lineage cùng phục hồi.
+
+Hướng cải thiện là tăng số sample theo từng corruption type, thêm Recall@k/MRR/nDCG và latency, chạy nhiều seed và báo confidence interval. Khi môi trường có model phù hợp, có thể bật RAGAS hoặc judge độc lập kèm trace đã che secret. Thành công được đo bằng coverage rõ ràng cho mỗi failure mode và comparison report có thể định lượng độ chắc chắn, không chỉ báo một điểm metric từ 8 câu hỏi.
 
 ## 10. Cam kết của thành viên
 
