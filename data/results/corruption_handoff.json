@@ -1,0 +1,18 @@
+{
+  "checkpoint": 5,
+  "status": "ready_for_role4",
+  "baseline_clean_artifact": "data\\clean\\papers_clean.json",
+  "corrupted_clean_artifact": "data\\clean\\papers_clean_corrupted.json",
+  "corruption_log": "data\\results\\corruption_log.json",
+  "baseline_rows": 24,
+  "corrupted_rows": 24,
+  "corruption_counts": {
+    "drop_latest": 2,
+    "blank_summary": 2,
+    "noise_summary": 2,
+    "truncate_title": 2,
+    "stale_date": 2,
+    "duplicate_rows": 2
+  },
+  "next_owner": "Role 4: build papers-corrupted from this artifact."
+}
