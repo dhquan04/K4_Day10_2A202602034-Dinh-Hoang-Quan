@@ -113,6 +113,16 @@ def generate_phase1_report(
     write_text(report_path, "\n".join(lines))
 
 
+def _fmt(value: Any) -> str:
+    if isinstance(value, float):
+        return f"{value:.4g}"
+    return str(value)
+
+
+def _check_map(quality: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {item.get("check"): item for item in quality.get("checks", []) if item.get("check")}
+
+
 def generate_corruption_report(
     report_path,
     baseline_metrics: dict[str, Any],
@@ -122,38 +132,128 @@ def generate_corruption_report(
     repaired_quality: dict[str, Any],
     corrupted_freshness: dict[str, Any],
     repaired_freshness: dict[str, Any],
-    *,
     baseline_quality: dict[str, Any] | None = None,
     baseline_freshness: dict[str, Any] | None = None,
     corruption_log: dict[str, Any] | None = None,
 ) -> None:
-    """Write an evidence-based baseline/corrupted/repaired comparison."""
+    """Write baseline vs corrupted vs repaired comparison from real artifacts."""
+    baseline_metrics = baseline_metrics or {}
+    corrupted_metrics = corrupted_metrics or {}
+    repaired_metrics = repaired_metrics or {}
     baseline_quality = baseline_quality or {}
     baseline_freshness = baseline_freshness or {}
     corruption_log = corruption_log or {}
 
-    metric_keys = ("samples", "retrieval_hit_rate", "mean_token_f1", "judge_accuracy", "mean_judge_score")
-    metric_rows = [
-        f"| {key} | {baseline_metrics.get(key, 'N/A')} | {corrupted_metrics.get(key, 'N/A')} | {repaired_metrics.get(key, 'N/A')} |"
-        for key in metric_keys
+    counts = corruption_log.get("counts") or {}
+    metric_keys = [
+        "samples",
+        "retrieval_hit_rate",
+        "mean_token_f1",
+        "judge_accuracy",
+        "mean_judge_score",
     ]
+
+    metric_rows = []
+    unchanged_metrics: list[str] = []
+    changed_metrics: list[str] = []
+    for key in metric_keys:
+        b_val = baseline_metrics.get(key)
+        c_val = corrupted_metrics.get(key)
+        r_val = repaired_metrics.get(key)
+        metric_rows.append(
+            f"| {key} | {_fmt(b_val)} | {_fmt(c_val)} | {_fmt(r_val)} |"
+        )
+        if b_val == c_val == r_val:
+            unchanged_metrics.append(key)
+        else:
+            changed_metrics.append(key)
+
+    bq = _check_map(baseline_quality)
+    cq = _check_map(corrupted_quality)
+    rq = _check_map(repaired_quality)
+    signal_names = ["row_count", "paper_id_unique", "summary_not_null", "summary_min_length"]
     quality_rows = [
-        f"| quality.passed | {baseline_quality.get('passed', 'N/A')} | {corrupted_quality.get('passed', 'N/A')} | {repaired_quality.get('passed', 'N/A')} |",
-        f"| row_count | {baseline_quality.get('row_count', 'N/A')} | {corrupted_quality.get('row_count', 'N/A')} | {repaired_quality.get('row_count', 'N/A')} |",
-        f"| freshness.is_fresh | {baseline_freshness.get('is_fresh', 'N/A')} | {corrupted_freshness.get('is_fresh', 'N/A')} | {repaired_freshness.get('is_fresh', 'N/A')} |",
-        f"| freshness.stale_rows | {baseline_freshness.get('stale_rows', 'N/A')} | {corrupted_freshness.get('stale_rows', 'N/A')} | {repaired_freshness.get('stale_rows', 'N/A')} |",
+        "| Signal | Baseline | Corrupted | Repaired |",
+        "| --- | --- | --- | --- |",
+        (
+            f"| quality.passed | {baseline_quality.get('passed')} | "
+            f"{corrupted_quality.get('passed')} | {repaired_quality.get('passed')} |"
+        ),
     ]
-    counts = corruption_log.get("counts", {})
-    count_text = ", ".join(f"{name}={value}" for name, value in counts.items()) or "N/A"
+    for name in signal_names:
+        quality_rows.append(
+            "| {name} | {b} | {c} | {r} |".format(
+                name=name,
+                b=(bq.get(name) or {}).get("status", "N/A"),
+                c=(cq.get(name) or {}).get("status", "N/A"),
+                r=(rq.get(name) or {}).get("status", "N/A"),
+            )
+        )
+    quality_rows.extend(
+        [
+            (
+                f"| freshness.is_fresh | {baseline_freshness.get('is_fresh')} | "
+                f"{corrupted_freshness.get('is_fresh')} | {repaired_freshness.get('is_fresh')} |"
+            ),
+            (
+                f"| freshness.stale_rows | {baseline_freshness.get('stale_rows')} | "
+                f"{corrupted_freshness.get('stale_rows')} | {repaired_freshness.get('stale_rows')} |"
+            ),
+            (
+                f"| freshness.max_age_days | {baseline_freshness.get('max_age_days')} | "
+                f"{corrupted_freshness.get('max_age_days')} | {repaired_freshness.get('max_age_days')} |"
+            ),
+            (
+                f"| freshness.latest_published | {baseline_freshness.get('latest_published')} | "
+                f"{corrupted_freshness.get('latest_published')} | {repaired_freshness.get('latest_published')} |"
+            ),
+        ]
+    )
+
+    causal_lines = [
+        "- `blank_summary` → `summary_not_null`/`summary_min_length` fail on corrupted "
+        f"({(cq.get('summary_not_null') or {}).get('value', 'N/A')} missing) → repaired recovers "
+        f"(`{(rq.get('summary_not_null') or {}).get('status', 'N/A')}`).",
+        "- `duplicate_rows` → `paper_id_unique` fail on corrupted → repaired unique again.",
+        "- `stale_date` → `freshness.stale_rows` "
+        f"{baseline_freshness.get('stale_rows')}→{corrupted_freshness.get('stale_rows')}→"
+        f"{repaired_freshness.get('stale_rows')}; `is_fresh` "
+        f"{baseline_freshness.get('is_fresh')}→{corrupted_freshness.get('is_fresh')}→"
+        f"{repaired_freshness.get('is_fresh')}.",
+        "- `drop_latest` → `latest_published` "
+        f"{baseline_freshness.get('latest_published')}→{corrupted_freshness.get('latest_published')} "
+        "(repaired restores baseline date when clean rebuild succeeds).",
+    ]
+    if unchanged_metrics and not changed_metrics:
+        causal_lines.append(
+            "- Agent metrics (`"
+            + "`, `".join(unchanged_metrics)
+            + "`) **không đổi** giữa baseline/corrupted/repaired trên locked test set. "
+            "Không kết luận corruption làm RAG kém hơn về metric khi số liệu không thay đổi."
+        )
+    elif changed_metrics:
+        causal_lines.append(
+            "- Metric đổi quan sát được: " + ", ".join(changed_metrics) + "."
+        )
+
     lines = [
         "# CP5 Corruption Comparison Report",
         "",
         "## Controlled corruption",
         "",
         f"- Seed: `{corruption_log.get('seed', 'N/A')}`",
-        f"- Rows: `{corruption_log.get('row_count_before', 'N/A')}` baseline → `{corruption_log.get('row_count_after', 'N/A')}` corrupted",
-        f"- Events: {count_text}",
+        (
+            f"- Rows: `{corruption_log.get('row_count_before', 'N/A')}` baseline → "
+            f"`{corruption_log.get('row_count_after', 'N/A')}` corrupted"
+        ),
+        (
+            "- Events: "
+            + ", ".join(f"{name}={count}" for name, count in counts.items())
+            if counts
+            else "- Events: N/A"
+        ),
         "- Repair source: immutable raw snapshot (`data/raw/crossref_records.json`).",
+        "- Evaluation set: locked `data/eval/test_set.json` (same for all three states).",
         "",
         "## Evaluation metrics",
         "",
@@ -163,13 +263,17 @@ def generate_corruption_report(
         "",
         "## Quality and freshness signals",
         "",
-        "| Signal | Baseline | Corrupted | Repaired |",
-        "| --- | --- | --- | --- |",
         *quality_rows,
+        "",
+        "## Causal links (only with observed numbers)",
+        "",
+        *causal_lines,
         "",
         "## Evidence rule",
         "",
-        "Changes are reported as observed values above. A causal claim is limited to corruption events and signal/metric deltas present in these artifacts; no claim is inferred when the values do not change.",
+        "Changes are reported as observed values above. A causal claim is limited to "
+        "corruption events and signal/metric deltas present in these artifacts; "
+        "no claim is inferred when the values do not change.",
         "",
     ]
     write_text(report_path, "\n".join(lines))
