@@ -4,13 +4,19 @@ import dataclasses
 from dataclasses import dataclass
 from pathlib import Path
 import re
+import sys
 import time
 from typing import Any
 
 import requests
 
-from core.config import Settings
+_src_dir = str(Path(__file__).resolve().parents[1])
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
+from core.config import Settings, load_settings
 from core.utils import normalize_whitespace, read_json, write_json
+
 
 
 @dataclass(frozen=True)
@@ -235,4 +241,45 @@ def load_raw_records(path: Path) -> list[PaperRecord]:
             )
         )
     return records
+
+
+def inspect_raw_lineage(records: list[PaperRecord]) -> dict[str, Any]:
+    """Inspect and audit raw record snapshot for CP1 lineage and handoff."""
+    total = len(records)
+    unique_ids = len(set(r.paper_id for r in records))
+    missing_summary = sum(1 for r in records if not r.summary.strip())
+    missing_title = sum(1 for r in records if not r.title.strip())
+    missing_published = sum(1 for r in records if not r.published.strip())
+    missing_authors = sum(1 for r in records if not r.authors)
+
+    return {
+        "total_records": total,
+        "unique_ids": unique_ids,
+        "has_duplicates": total != unique_ids,
+        "missing_summary_count": missing_summary,
+        "missing_title_count": missing_title,
+        "missing_published_count": missing_published,
+        "missing_authors_count": missing_authors,
+        "sample_paper_id": records[0].paper_id if records else None,
+        "sample_title": records[0].title if records else None,
+        "sample_authors": records[0].authors if records else [],
+        "sample_published": records[0].published if records else None,
+    }
+
+
+if __name__ == "__main__":
+    import json
+    s = load_settings()
+    if s.paths.raw_records_json.exists():
+        recs = load_raw_records(s.paths.raw_records_json)
+        audit = inspect_raw_lineage(recs)
+        print(f"[OK] Loaded {len(recs)} raw records successfully.")
+        print("[AUDIT] Lineage Summary:")
+        print(json.dumps(audit, indent=2, ensure_ascii=True))
+    else:
+        print("[WARN] raw_records_json does not exist. Run fetch_source_records(settings) first.")
+
+
+
+
 
