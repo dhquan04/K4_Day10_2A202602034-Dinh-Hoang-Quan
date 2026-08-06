@@ -1,4 +1,4 @@
-"""Baseline raw-to-report pipeline used at checkpoint 3."""
+# Baseline raw-to-report pipeline used at checkpoint 3.
 
 from __future__ import annotations
 
