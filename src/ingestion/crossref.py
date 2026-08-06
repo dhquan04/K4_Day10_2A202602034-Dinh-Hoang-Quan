@@ -326,6 +326,57 @@ def trace_paper_lineage(paper_id: str, settings: Settings) -> dict[str, Any]:
     }
 
 
+def trace_corrupted_lineage(paper_id: str, settings: Settings) -> dict[str, Any]:
+    """Trace a paper_id between original raw data and corrupted clean data to verify corruption lineage (CP5)."""
+    target_id = paper_id.strip().lower()
+
+    # 1. Raw original
+    raw_record = None
+    if settings.paths.raw_records_json.exists():
+        raw_list = read_json(settings.paths.raw_records_json)
+        for item in raw_list:
+            if str(item.get("paper_id", "")).strip().lower() == target_id:
+                raw_record = item
+                break
+
+    # 2. Corrupted dataset
+    corrupted_record = None
+    if settings.paths.corrupted_clean_json.exists():
+        corrupt_list = read_json(settings.paths.corrupted_clean_json)
+        for item in corrupt_list:
+            if str(item.get("paper_id", "")).strip().lower() == target_id:
+                corrupted_record = item
+                break
+
+    # 3. Corruption log
+    log_event = None
+    if settings.paths.corruption_log.exists():
+        log_payload = read_json(settings.paths.corruption_log)
+        events_dict = log_payload.get("events", {})
+        for event_type, event_list in events_dict.items():
+            for ev in event_list:
+                if str(ev.get("paper_id", "")).strip().lower() == target_id:
+                    log_event = ev
+                    break
+            if log_event:
+                break
+
+    return {
+        "paper_id": paper_id,
+        "raw_exists": raw_record is not None,
+        "corrupted_exists": corrupted_record is not None,
+        "corruption_logged": log_event is not None,
+        "corruption_type": log_event.get("type") if log_event else None,
+        "raw_title": raw_record.get("title") if raw_record else None,
+        "corrupted_title": corrupted_record.get("title") if corrupted_record else None,
+        "raw_summary": raw_record.get("summary") if raw_record else None,
+        "corrupted_summary": corrupted_record.get("summary") if corrupted_record else None,
+        "raw_published": raw_record.get("published") if raw_record else None,
+        "corrupted_published": corrupted_record.get("published") if corrupted_record else None,
+    }
+
+
+
 if __name__ == "__main__":
     import json
     s = load_settings()
