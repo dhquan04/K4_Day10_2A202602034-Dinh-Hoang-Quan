@@ -66,10 +66,10 @@ Chi tiết thực hiện: CP1 xác định cột bắt buộc, normalisation và
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
-- **Triệu chứng:** duplicate và blank summary bị strict validation/index reject.
-- **Nguyên nhân:** corrupted data cố ý vi phạm clean contract.
-- **Xử lý:** tách state corrupted, chỉ nới index validation tại nhánh thí nghiệm; repaired vẫn strict.
-- **Xác minh:** corrupted build được, repaired 24/24 rows và ID unique.
+- **Triệu chứng:** `papers-corrupted` build fail vì `validate_index_input()` (`src/retrieval/index.py`, thuộc phạm vi Role 4) reject duplicate `paper_id` và blank summary.
+- **Nguyên nhân:** corrupted data do tôi tạo ra cố ý vi phạm clean contract (đúng mục đích CP5), nên strict validation cho baseline không phù hợp để build state này.
+- **Xử lý:** tôi báo lỗi kèm evidence (`corruption_log.json`) cho Role 4; Role 4 thêm cờ `allow_intentional_corruption` trong `index.py` để cho phép build `papers-corrupted` mà không nới lỏng validation cho baseline/repaired. Phần của tôi chỉ dừng ở việc tách state corrupted sang path/artifact riêng (`papers_clean_corrupted.{csv,json}`) và giữ `corrupt_clean_dataframe()`/repair vẫn strict.
+- **Xác minh:** corrupted build được (không ghi đè baseline), repaired 24/24 rows và ID unique qua `validate_clean.py` PASS.
 
 ## 7. Hiểu biết về luồng end-to-end
 
@@ -92,7 +92,9 @@ Hướng cải thiện: thêm corruption cho author/DOI/category/ngôn ngữ; d�
 - [x] Nội dung phản ánh đúng phần việc và mức hiểu của tôi.
 - [x] Tôi có thể giải thích luồng end-to-end và evidence đi kèm.
 - [x] Không có kết luận recovery thiếu artifact hoặc metric.
-- [x] Báo cáo không chứa API key, token hoặc secret.
+- [x] Tôi không ghi "đã chạy thành công" cho phần chưa được kiểm chứng.
+- [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
+- [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
 **Họ và tên:** **Đỗ Việt Tùng**  
 **Ngày xác nhận:** **2026-08-06**
